@@ -48,7 +48,7 @@ export default function Profile() {
           ? "/harita.jpeg"
           : "/mam.png"
         : user?.role?.toLowerCase() === "driver"
-          ? "/sabbu%20driver.jpeg"
+          ? "/sabbudriver.jpeg"
         : "/kisore.png";
 
   const isDriver = user?.role?.toLowerCase() === "driver";

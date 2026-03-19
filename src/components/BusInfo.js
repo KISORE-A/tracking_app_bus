@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const defaultBus = {
   busNo: "TN-23-AB-1234",
@@ -7,6 +8,7 @@ const defaultBus = {
 };
 
 export default function BusInfo() {
+  const navigate = useNavigate();
   const [bus, setBus] = useState(defaultBus);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({});
@@ -36,7 +38,11 @@ export default function BusInfo() {
   };
 
   return (
-    <div className="card">
+    <div
+      className="card"
+      onClick={!isEditing ? () => navigate("/profile") : undefined}
+      style={{ cursor: isEditing ? "default" : "pointer" }}
+    >
       <h3>🚌 Bus Information</h3>
       {isEditing ? (
         <div className="edit-box">
@@ -71,13 +77,19 @@ export default function BusInfo() {
           </div>
           <div className="form-actions">
             <button
-              onClick={handleSaveEdit}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSaveEdit();
+              }}
               className="success"
             >
               ✓ Save
             </button>
             <button
-              onClick={() => setIsEditing(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(false);
+              }}
               className="secondary"
             >
               ✕ Cancel
@@ -97,7 +109,10 @@ export default function BusInfo() {
           </p>
           {canEdit && (
             <button
-              onClick={handleStartEdit}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleStartEdit();
+              }}
               style={{ width: "100%", marginTop: "8px" }}
             >
               ✏️ Edit

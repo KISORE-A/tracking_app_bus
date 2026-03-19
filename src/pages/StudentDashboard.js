@@ -13,8 +13,12 @@ export default function StudentDashboard() {
   return (
     <>
       <Navigation />
-      <div className="dashboard-wrapper" id="top">
+      <div className="dashboard-wrapper dashboard-wrapper--wide" id="top">
         <div className="dashboard">
+          <div id="map-section" className="map-card">
+            <MapSection />
+          </div>
+
           <div className="dashboard-tri-row" id="profile-section">
             <BusInfo />
             <div id="route-section"><RouteInfo /></div>
@@ -43,10 +47,6 @@ export default function StudentDashboard() {
 
           <div style={{ marginTop: "1rem", gridColumn: "1 / -1", width: "100%" }}>
             <WeatherInfo allowEdit={false} />
-          </div>
-
-          <div id="map-section" className="map-card">
-            <MapSection />
           </div>
           <FeedbackPanel />
         </div>

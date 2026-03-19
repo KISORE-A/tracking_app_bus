@@ -18,7 +18,7 @@ export default function Navigation() {
           ? "/harita.jpeg"
           : "/mam.png"
         : role?.toLowerCase() === "driver"
-          ? "/sabbu%20driver.jpeg"
+          ? "/sabbudriver.jpeg"
         : "/kisore.png";
 
   useEffect(() => {

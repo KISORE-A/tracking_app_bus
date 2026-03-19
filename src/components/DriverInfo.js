@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const defaultDrivers = [
-  { id: 1, name: "Ravi Kumar", phone: "9876543210", experience: 8, busNo: "TN-23-AB-1234" },
+  { id: 1, name: "TAMIZHAKARAN K", phone: "9876543210", experience: 8, busNo: "TN-23-AB-1234", image: "/tamil.jpeg" },
   { id: 2, name: "Vikram Singh", phone: "9876543211", experience: 5, busNo: "TN-23-AB-5678" },
   { id: 3, name: "Arjun Patel", phone: "9876543212", experience: 10, busNo: "TN-23-AB-9012" },
 ];
 
 export default function DriverInfo() {
+  const navigate = useNavigate();
   const [drivers, setDrivers] = useState(defaultDrivers);
   const [selectedId, setSelectedId] = useState(defaultDrivers[0]?.id || 1);
   const [isEditing, setIsEditing] = useState(false);
@@ -68,7 +70,11 @@ export default function DriverInfo() {
   };
 
   return (
-    <div className="card">
+    <div
+      className="card"
+      onClick={!isEditing ? () => navigate("/profile") : undefined}
+      style={{ cursor: isEditing ? "default" : "pointer" }}
+    >
       <h3>👨‍✈️ Driver Details</h3>
 
       {isAdmin && (
@@ -90,7 +96,10 @@ export default function DriverInfo() {
               ))}
             </select>
             <button
-              onClick={handleAddDriver}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddDriver();
+              }}
               className="success"
             >
               ➕ Add
@@ -137,13 +146,19 @@ export default function DriverInfo() {
             </div>
             <div className="form-actions">
               <button
-                onClick={handleSaveEdit}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSaveEdit();
+                }}
                 className="success"
               >
                 ✓ Save
               </button>
               <button
-                onClick={() => setIsEditing(false)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditing(false);
+                }}
                 className="secondary"
               >
                 ✕ Cancel
@@ -151,28 +166,102 @@ export default function DriverInfo() {
             </div>
           </div>
         ) : (
-          <div>
-            <p>
-              <strong>Name:</strong> {currentDriver.name}
-            </p>
-            <p>
-              <strong>Phone:</strong> {currentDriver.phone}
-            </p>
-            <p>
-              <strong>Experience:</strong> {currentDriver.experience} Years
-            </p>
-            <p>
-              <strong>Bus No:</strong> {currentDriver.busNo}
-            </p>
+          <div
+            style={{
+              background: "#ffffff",
+              borderRadius: "24px",
+              overflow: "hidden",
+              boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
+            }}
+          >
+            <div
+              style={{
+                height: "140px",
+                background: "linear-gradient(135deg, #11479d 0%, #2e86de 100%)",
+              }}
+            />
+            <div
+              style={{
+                padding: "0 28px 28px",
+                marginTop: "-62px",
+                display: "flex",
+                alignItems: "flex-end",
+                gap: "24px",
+                flexWrap: "wrap",
+              }}
+            >
+              {currentDriver.image && (
+                <img
+                  src={currentDriver.image}
+                  alt={currentDriver.name}
+                  style={{
+                    width: "124px",
+                    height: "124px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "6px solid #ffffff",
+                    background: "#ffffff",
+                    boxShadow: "0 12px 24px rgba(15, 23, 42, 0.14)",
+                  }}
+                />
+              )}
+              <div style={{ paddingBottom: "12px" }}>
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: "clamp(2rem, 5vw, 3rem)",
+                    lineHeight: 1,
+                    fontWeight: 800,
+                    color: "#0f172a",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  {currentDriver.name}
+                </h2>
+                <div
+                  style={{
+                    marginTop: "14px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "10px 18px",
+                    borderRadius: "999px",
+                    background: "#dbe4f0",
+                    color: "#35527a",
+                    fontWeight: 700,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  DRIVER
+                </div>
+              </div>
+            </div>
+            <div style={{ padding: "0 28px 28px" }}>
+              <p>
+                <strong>Phone:</strong> {currentDriver.phone}
+              </p>
+              <p>
+                <strong>Experience:</strong> {currentDriver.experience} Years
+              </p>
+              <p>
+                <strong>Bus No:</strong> {currentDriver.busNo}
+              </p>
+            </div>
             {isAdmin && (
-              <div className="form-actions" style={{ marginTop: "12px" }}>
+              <div className="form-actions" style={{ margin: "0 28px 28px" }}>
                 <button
-                  onClick={handleStartEdit}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStartEdit();
+                  }}
                 >
                   ✏️ Edit
                 </button>
                 <button
-                  onClick={() => handleDeleteDriver(currentDriver.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteDriver(currentDriver.id);
+                  }}
                   className="danger"
                 >
                   🗑️ Delete

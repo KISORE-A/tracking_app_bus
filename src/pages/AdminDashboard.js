@@ -70,6 +70,11 @@ export default function AdminDashboard() {
     transition: 'all 0.3s ease',
     letterSpacing: '0.3px'
   });
+  const totalFeesFlow = stats.revenue + stats.pending;
+  const collectionRate = totalFeesFlow > 0 ? Math.round((stats.revenue / totalFeesFlow) * 100) : 0;
+  const occupancyRate = stats.totalCapacity > 0 ? Math.round((stats.filledSeats / stats.totalCapacity) * 100) : 0;
+  const totalPeopleManaged = stats.students + stats.teachers + stats.drivers;
+  const avgFilledPerBus = stats.buses > 0 ? (stats.filledSeats / stats.buses).toFixed(1) : "0.0";
 
   return (
     <>
@@ -137,13 +142,13 @@ export default function AdminDashboard() {
                       position: 'absolute',
                       right: '10px',
                       bottom: '10px',
-                      width: '22px',
+                      width: '18px',
                       height: '18px',
-                      borderRadius: '6px',
+                      borderRadius: '50%',
                       border: 'none',
                       background: 'rgba(255,255,255,0.28)',
                       color: 'white',
-                      fontSize: '0.75rem',
+                      fontSize: '0.62rem',
                       fontWeight: 800,
                       cursor: 'pointer',
                       display: 'flex',
@@ -178,6 +183,70 @@ export default function AdminDashboard() {
                 </div>
               </Link>
             ))}
+          </div>
+
+          <div className="card" style={{ padding: "1.25rem", marginBottom: "1.5rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              <div>
+                <h3 style={{ color: "#2b3674", margin: 0 }}>Overview</h3>
+                <p style={{ color: "#707eae", margin: "4px 0 0 0" }}>
+                  Quick status for fees, capacity, attendance workflow, and admin operations.
+                </p>
+              </div>
+              <Link to="/admin/analytics" style={{ textDecoration: "none" }}>
+                <button className="secondary" style={{ padding: "8px 12px" }}>Open Full Analytics</button>
+              </Link>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px", marginTop: "12px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
+                {[
+                  { label: "Fee Collection Rate", value: `${collectionRate}%`, sub: `${stats.revenue.toLocaleString()} collected` },
+                  { label: "Seat Occupancy", value: `${occupancyRate}%`, sub: `${stats.filledSeats}/${stats.totalCapacity} seats` },
+                  { label: "People Managed", value: totalPeopleManaged.toLocaleString(), sub: `${stats.students} students • ${stats.teachers} teachers • ${stats.drivers} drivers` },
+                  { label: "Avg Filled / Bus", value: avgFilledPerBus, sub: `${stats.buses} active buses` }
+                ].map((m) => (
+                  <div key={m.label} style={{ border: "1px solid #e6edf7", borderRadius: "12px", padding: "12px", background: "#f8fbff" }}>
+                    <div style={{ color: "#64748b", fontSize: "0.82rem", fontWeight: 700 }}>{m.label}</div>
+                    <div style={{ color: "#1f2a5a", fontSize: "1.35rem", fontWeight: 900, marginTop: "2px" }}>{m.value}</div>
+                    <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginTop: "2px" }}>{m.sub}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ border: "1px solid #e6edf7", borderRadius: "12px", padding: "12px", background: "#ffffff" }}>
+                <div style={{ color: "#2b3674", fontWeight: 800, marginBottom: "8px" }}>Focus Area</div>
+                <div style={{ marginBottom: "10px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "#64748b" }}>
+                    <span>Fees</span>
+                    <strong style={{ color: "#334155" }}>{collectionRate}%</strong>
+                  </div>
+                  <div style={{ height: "8px", borderRadius: "999px", background: "#e2e8f0", overflow: "hidden", marginTop: "4px" }}>
+                    <div style={{ width: `${collectionRate}%`, height: "100%", background: "linear-gradient(135deg, #4318FF 0%, #3B71FE 100%)" }} />
+                  </div>
+                </div>
+                <div style={{ marginBottom: "10px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "#64748b" }}>
+                    <span>Fleet Capacity</span>
+                    <strong style={{ color: "#334155" }}>{occupancyRate}%</strong>
+                  </div>
+                  <div style={{ height: "8px", borderRadius: "999px", background: "#e2e8f0", overflow: "hidden", marginTop: "4px" }}>
+                    <div style={{ width: `${occupancyRate}%`, height: "100%", background: "linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)" }} />
+                  </div>
+                </div>
+                <div style={{ display: "grid", gap: "6px", marginTop: "12px" }}>
+                  <Link to="/admin/analytics" style={{ textDecoration: "none", color: "#2563eb", fontSize: "0.85rem", fontWeight: 700 }}>
+                    View attendance insights
+                  </Link>
+                  <Link to="/admin/finance" style={{ textDecoration: "none", color: "#2563eb", fontSize: "0.85rem", fontWeight: 700 }}>
+                    Review fees and pending list
+                  </Link>
+                  <Link to="/admin/feedback" style={{ textDecoration: "none", color: "#2563eb", fontSize: "0.85rem", fontWeight: 700 }}>
+                    Check complaints and feedback
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
 
 

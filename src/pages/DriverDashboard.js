@@ -169,15 +169,15 @@ export default function DriverDashboard() {
   return (
     <>
       <Navigation />
-      <div className="dashboard-wrapper" id="top">
+      <div className="dashboard-wrapper dashboard-wrapper--wide" id="top">
         <div className="dashboard">
+          <div id="map-section" className="map-card"><MapSection driverLocation={tracking.coords} /></div>
+
           <div className="dashboard-tri-row">
             <BusInfo />
             <div id="route-section"><RouteInfo /></div>
             <DriverInfo />
           </div>
-
-          <div id="map-section" className="map-card"><MapSection driverLocation={tracking.coords} /></div>
 
           <div id="notification-section"><Notifications /></div>
 

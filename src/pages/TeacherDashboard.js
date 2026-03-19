@@ -12,8 +12,10 @@ export default function TeacherDashboard() {
     return (
         <>
             <Navigation />
-            <div className="dashboard-wrapper" id="top">
+            <div className="dashboard-wrapper dashboard-wrapper--wide" id="top">
                 <div className="dashboard">
+                    <div id="map-section" className="map-card"><MapSection /></div>
+
                     <div className="dashboard-tri-row" id="profile-section">
                         <BusInfo />
                         <div id="route-section"><RouteInfo /></div>
@@ -41,9 +43,6 @@ export default function TeacherDashboard() {
                             Open Leave Approvals
                         </a>
                     </div>
-
-                    {/* FULL WIDTH MAP SECTION */}
-                    <div id="map-section" className="map-card"><MapSection /></div>
                     <FeedbackPanel />
 
 
