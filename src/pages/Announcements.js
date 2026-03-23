@@ -2,14 +2,30 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "../components/Navigation";
 import { getAnnouncements, createAnnouncement, deleteAnnouncement, getAllUsers, getStudents, getTeachers, getDrivers } from "../services/api";
+import {
+    AnnouncementIcon,
+    CalendarIcon,
+    CheckIcon,
+    CloseIcon,
+    EditIcon,
+    EmergencyIcon,
+    GlobeIcon,
+    HolidayIcon,
+    PlusIcon,
+    RouteIcon,
+    TrashIcon,
+    WalletIcon
+} from "../components/Icons";
+
+const iconText = { display: "inline-flex", alignItems: "center", gap: "8px" };
 
 const CATEGORY_CONFIG = {
-    general: { icon: "📢", color: "#4318FF", bg: "rgba(67, 24, 255, 0.08)", label: "General" },
-    emergency: { icon: "🚨", color: "#EE5D50", bg: "rgba(238, 93, 80, 0.08)", label: "Emergency" },
-    route_change: { icon: "🛣️", color: "#F76B1C", bg: "rgba(247, 107, 28, 0.08)", label: "Route Change" },
-    delay: { icon: "⏰", color: "#FFB547", bg: "rgba(255, 181, 71, 0.08)", label: "Delay" },
-    holiday: { icon: "🎉", color: "#05CD99", bg: "rgba(5, 205, 153, 0.08)", label: "Holiday" },
-    fee_reminder: { icon: "💰", color: "#3B71FE", bg: "rgba(59, 113, 254, 0.08)", label: "Fee Reminder" },
+    general: { icon: <AnnouncementIcon size={16} />, color: "#d89a10", bg: "rgba(67, 24, 255, 0.08)", label: "General" },
+    emergency: { icon: <EmergencyIcon size={16} />, color: "#EE5D50", bg: "rgba(238, 93, 80, 0.08)", label: "Emergency" },
+    route_change: { icon: <RouteIcon size={16} />, color: "#F76B1C", bg: "rgba(247, 107, 28, 0.08)", label: "Route Change" },
+    delay: { icon: <CalendarIcon size={16} />, color: "#FFB547", bg: "rgba(255, 181, 71, 0.08)", label: "Delay" },
+    holiday: { icon: <HolidayIcon size={16} />, color: "#05CD99", bg: "rgba(5, 205, 153, 0.08)", label: "Holiday" },
+    fee_reminder: { icon: <WalletIcon size={16} />, color: "#f4bf32", bg: "rgba(59, 113, 254, 0.08)", label: "Fee Reminder" },
 };
 
 const PRIORITY_CONFIG = {
@@ -112,7 +128,7 @@ export default function Announcements() {
         const ann = shareModal.announcement;
         
         if (shareModal.type === 'whatsapp') {
-            const text = `📢 *Akshuu Transports Announcement*\n\n*${ann.title}*\n${ann.message}\n\n_Target: ${ann.targetAudience}_`;
+            const text = `Akshuu Transports Announcement\n\n${ann.title}\n${ann.message}\n\nTarget: ${ann.targetAudience}`;
             const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
             window.open(url, '_blank');
             setShareModal(null);
@@ -170,7 +186,7 @@ export default function Announcements() {
         border: "1px solid var(--border-color, #e2e8f0)",
         fontSize: "0.95rem",
         background: "var(--background-light, #f4f7fe)",
-        color: "var(--text-dark, #2b3674)",
+        color: "var(--text-dark, #8a5a00)",
         outline: "none",
         transition: "border-color 0.2s, box-shadow 0.2s",
         marginBottom: "1rem",
@@ -192,8 +208,8 @@ export default function Announcements() {
                     {/* Header */}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
                         <div>
-                            <h2 style={{ color: "var(--text-dark, #2b3674)", fontSize: "2rem", margin: 0, display: "flex", alignItems: "center", gap: "10px" }}>
-                                📢 Announcements
+                            <h2 style={{ color: "var(--text-dark, #8a5a00)", fontSize: "2rem", margin: 0, display: "flex", alignItems: "center", gap: "10px" }}>
+                                <span style={iconText}><AnnouncementIcon size={24} color="var(--text-dark, #8a5a00)" />Announcements</span>
                             </h2>
                             <p style={{ color: "var(--text-light, #707eae)", fontSize: "1rem", margin: "0.25rem 0 0" }}>
                                 {isAdmin ? "Broadcast messages to your transport network" : "Stay updated with latest announcements"}
@@ -206,8 +222,8 @@ export default function Announcements() {
                                     padding: "12px 24px",
                                     borderRadius: "50px",
                                     border: "none",
-                                    background: showForm ? "var(--card-bg, white)" : "linear-gradient(135deg, #4318FF, #3B71FE)",
-                                    color: showForm ? "var(--text-dark, #2b3674)" : "white",
+                                    background: showForm ? "var(--card-bg, white)" : "linear-gradient(135deg, #d89a10, #f4bf32)",
+                                    color: showForm ? "var(--text-dark, #8a5a00)" : "white",
                                     fontWeight: 700,
                                     fontSize: "0.95rem",
                                     cursor: "pointer",
@@ -216,7 +232,7 @@ export default function Announcements() {
                                     display: "flex", alignItems: "center", gap: "8px",
                                 }}
                             >
-                                {showForm ? "✕ Cancel" : "➕ New Announcement"}
+                                {showForm ? <span style={iconText}><CloseIcon size={16} />Cancel</span> : <span style={iconText}><PlusIcon size={16} />New Announcement</span>}
                             </button>
                         )}
                     </div>
@@ -229,8 +245,8 @@ export default function Announcements() {
                             animation: "slideDown 0.3s ease",
                             border: "2px solid rgba(67, 24, 255, 0.15)",
                         }}>
-                            <h3 style={{ color: "var(--text-dark, #2b3674)", marginBottom: "1.25rem", fontSize: "1.2rem" }}>
-                                ✍️ Create Announcement
+                            <h3 style={{ color: "var(--text-dark, #8a5a00)", marginBottom: "1.25rem", fontSize: "1.2rem" }}>
+                                <span style={iconText}><EditIcon size={18} color="var(--text-dark, #8a5a00)" />Create Announcement</span>
                             </h3>
                             <form onSubmit={handleSubmit}>
                                 <input
@@ -240,7 +256,7 @@ export default function Announcements() {
                                     onChange={(e) => setForm({ ...form, title: e.target.value })}
                                     required
                                     style={inputStyle}
-                                    onFocus={(e) => { e.target.style.borderColor = "#4318FF"; e.target.style.boxShadow = "0 0 0 3px rgba(67,24,255,0.1)"; }}
+                                    onFocus={(e) => { e.target.style.borderColor = "#d89a10"; e.target.style.boxShadow = "0 0 0 3px rgba(67,24,255,0.1)"; }}
                                     onBlur={(e) => { e.target.style.borderColor = "var(--border-color, #e2e8f0)"; e.target.style.boxShadow = "none"; }}
                                 />
                                 <textarea
@@ -250,7 +266,7 @@ export default function Announcements() {
                                     required
                                     rows={4}
                                     style={{ ...inputStyle, resize: "vertical", minHeight: "100px" }}
-                                    onFocus={(e) => { e.target.style.borderColor = "#4318FF"; e.target.style.boxShadow = "0 0 0 3px rgba(67,24,255,0.1)"; }}
+                                    onFocus={(e) => { e.target.style.borderColor = "#d89a10"; e.target.style.boxShadow = "0 0 0 3px rgba(67,24,255,0.1)"; }}
                                     onBlur={(e) => { e.target.style.borderColor = "var(--border-color, #e2e8f0)"; e.target.style.boxShadow = "none"; }}
                                 />
 
@@ -263,7 +279,7 @@ export default function Announcements() {
                                             style={{ ...inputStyle, marginBottom: 0, cursor: "pointer" }}
                                         >
                                             {Object.entries(CATEGORY_CONFIG).map(([key, val]) => (
-                                                <option key={key} value={key}>{val.icon} {val.label}</option>
+                                                <option key={key} value={key}>{val.label}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -274,10 +290,10 @@ export default function Announcements() {
                                             onChange={(e) => setForm({ ...form, targetAudience: e.target.value })}
                                             style={{ ...inputStyle, marginBottom: 0, cursor: "pointer" }}
                                         >
-                                            <option value="all">🌐 Everyone</option>
-                                            <option value="students">🎓 Students Only</option>
-                                            <option value="teachers">👩‍🏫 Teachers Only</option>
-                                            <option value="drivers">👨‍✈️ Drivers Only</option>
+                                            <option value="all">Everyone</option>
+                                            <option value="students">Students Only</option>
+                                            <option value="teachers">Teachers Only</option>
+                                            <option value="drivers">Drivers Only</option>
                                         </select>
                                     </div>
                                     <div>
@@ -302,7 +318,7 @@ export default function Announcements() {
                                         padding: "14px",
                                         borderRadius: "12px",
                                         border: "none",
-                                        background: "linear-gradient(135deg, #4318FF, #3B71FE)",
+                                        background: "linear-gradient(135deg, #d89a10, #f4bf32)",
                                         color: "white",
                                         fontWeight: 700,
                                         fontSize: "1rem",
@@ -312,7 +328,7 @@ export default function Announcements() {
                                         boxShadow: "0 4px 15px rgba(67, 24, 255, 0.3)",
                                     }}
                                 >
-                                    {submitting ? "Publishing..." : "📢 Publish Announcement"}
+                                    {submitting ? "Publishing..." : "Publish Announcement"}
                                 </button>
                             </form>
                         </div>
@@ -323,15 +339,15 @@ export default function Announcements() {
                         <div style={{ textAlign: "center", padding: "4rem 0" }}>
                             <div style={{
                                 width: "50px", height: "50px", border: "4px solid #e2e8f0",
-                                borderTop: "4px solid #4318FF", borderRadius: "50%",
+                                borderTop: "4px solid #d89a10", borderRadius: "50%",
                                 animation: "spin 1s linear infinite", margin: "0 auto 20px"
                             }} />
                             <p style={{ color: "var(--text-light, #707eae)" }}>Loading announcements...</p>
                         </div>
                     ) : announcements.length === 0 ? (
                         <div style={{ ...cardStyle, textAlign: "center", padding: "4rem 2rem" }}>
-                            <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>📭</div>
-                            <h3 style={{ color: "var(--text-dark, #2b3674)", margin: "0 0 0.5rem" }}>No Announcements Yet</h3>
+                            <div style={{ fontSize: "4rem", marginBottom: "1rem", display: "flex", justifyContent: "center" }}><AnnouncementIcon size={48} color="#d89a10" /></div>
+                            <h3 style={{ color: "var(--text-dark, #8a5a00)", margin: "0 0 0.5rem" }}>No Announcements Yet</h3>
                             <p style={{ color: "var(--text-light, #707eae)", margin: 0 }}>
                                 {isAdmin ? "Create your first announcement to broadcast to your network!" : "No announcements to show at this time."}
                             </p>
@@ -379,13 +395,13 @@ export default function Announcements() {
                                                         color: "var(--text-light, #707eae)",
                                                         fontWeight: 600, fontSize: "0.75rem",
                                                     }}>
-                                                        🎯 {ann.targetAudience}
+                                                        <span style={iconText}><GlobeIcon size={14} />{ann.targetAudience}</span>
                                                     </span>
                                                 )}
                                             </div>
                                             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                                                 <span style={{ fontSize: "0.8rem", color: "var(--text-light, #707eae)" }}>
-                                                    🕐 {getTimeAgo(ann.createdAt)}
+                                                    <span style={iconText}><CalendarIcon size={14} />{getTimeAgo(ann.createdAt)}</span>
                                                 </span>
                                                 
                                                 {isAdmin && (
@@ -426,7 +442,7 @@ export default function Announcements() {
                                                                 marginLeft: "5px",
                                                             }}
                                                         >
-                                                            🗑️ Delete
+                                                            <span style={iconText}><TrashIcon size={14} />Delete</span>
                                                         </button>
                                                     </>
                                                 )}
@@ -435,7 +451,7 @@ export default function Announcements() {
 
                                         {/* Title */}
                                         <h3 style={{
-                                            color: "var(--text-dark, #2b3674)",
+                                            color: "var(--text-dark, #8a5a00)",
                                             fontSize: "1.15rem",
                                             fontWeight: 700,
                                             margin: "0 0 8px",
@@ -471,13 +487,13 @@ export default function Announcements() {
             {shareModal && (
                 <div style={modalOverlay}>
                     <div className="card" style={{ width: '480px', padding: '2rem', position: 'relative', background: 'white', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
-                        <button onClick={() => setShareModal(null)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#a3aed0' }}>✕</button>
+                        <button onClick={() => setShareModal(null)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#a3aed0' }}><CloseIcon size={18} /></button>
 
                         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
                                 {shareModal.type === 'whatsapp' ? <WhatsAppIcon size={50} /> : <GmailIcon size={44} />}
                             </div>
-                            <h3 style={{ color: '#2b3674', margin: 0 }}>
+                            <h3 style={{ color: '#8a5a00', margin: 0 }}>
                                 Broadcast via {shareModal.type === 'whatsapp' ? 'WhatsApp' : 'Email'}?
                             </h3>
                             <p style={{ fontSize: '0.85rem', color: '#707eae', marginTop: '5px' }}>
@@ -499,13 +515,13 @@ export default function Announcements() {
 
                         {shareModal.type === 'whatsapp' && (
                             <p style={{ fontSize: '0.8rem', color: '#a3aed0', textAlign: 'center', marginBottom: '1rem' }}>
-                                ℹ️ This will open WhatsApp where you can select multiple contacts or groups to forward this message.
+                                This will open WhatsApp where you can select multiple contacts or groups to forward this message.
                             </p>
                         )}
 
                         {shareModal.type === 'email' && (
                             <p style={{ fontSize: '0.8rem', color: '#a3aed0', textAlign: 'center', marginBottom: '1rem' }}>
-                                ℹ️ This will open your default Email Client and BCC all valid users under the target audience.
+                                This will open your default email client and BCC all valid users under the target audience.
                             </p>
                         )}
 
@@ -514,12 +530,12 @@ export default function Announcements() {
                                 flex: 1, padding: '12px', fontWeight: 'bold', border: 'none', borderRadius: '10px', cursor: 'pointer', color: 'white', fontSize: '0.9rem',
                                 background: shareModal.type === 'whatsapp' ? '#25D366' : '#EA4335'
                             }}>
-                                ✅ Pre-fill & Broadcast
+                                <span style={iconText}><CheckIcon size={16} />Pre-fill & Broadcast</span>
                             </button>
                             <button onClick={() => setShareModal(null)} style={{
                                 flex: 1, padding: '12px', fontWeight: 'bold', border: '1px solid #e2e8f0', borderRadius: '10px', cursor: 'pointer', color: '#707eae', background: 'white', fontSize: '0.9rem'
                             }}>
-                                ❌ Cancel
+                                <span style={iconText}><CloseIcon size={16} />Cancel</span>
                             </button>
                         </div>
                     </div>
@@ -543,4 +559,5 @@ export default function Announcements() {
         </>
     );
 }
+
 

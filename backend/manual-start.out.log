@@ -1,0 +1,8 @@
+
+> akshuu-backend@1.0.0 start
+> node server.js
+
+[dotenv@17.2.4] injecting env (3) from .env -- tip: ⚙️  override existing env vars with { override: true }
+[dotenv@17.2.4] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+Server running on http://localhost:5000
+MongoDB Connected Successfully (mongodb+srv://kisoreme23_db_user:kCR98ob0QX8QAG3R@cluster0.zkz0kct.mongodb.net/akshuutransports?appName=Cluster0&retryWrites=true&w=majority)

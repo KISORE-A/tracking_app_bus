@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import QrReader from "react-qr-reader";
+import { CameraIcon, ClockIcon, DriverIcon } from "./Icons";
 
 function AttendanceDriver() {
   const [otp, setOtp] = useState("");
@@ -23,7 +24,7 @@ function AttendanceDriver() {
     if (timeLeft === 0) {
       setActive(false);
       setOtp("");
-      alert("OTP Expired ❌");
+      alert("OTP expired.");
       return;
     }
 
@@ -47,7 +48,7 @@ function AttendanceDriver() {
   const handleScan = (data) => {
     if (data && active && data === otp) {
       markAttendance();
-      alert("Attendance Marked Successfully ✅");
+      alert("Attendance marked successfully.");
       setActive(false);
       setOtp("");
     }
@@ -60,12 +61,12 @@ function AttendanceDriver() {
     }
     if (enteredOtp === otp) {
       markAttendance();
-      alert("Attendance marked ✅");
+      alert("Attendance marked.");
       setActive(false);
       setOtp("");
       setEnteredOtp("");
     } else {
-      alert("Invalid OTP ❌");
+      alert("Invalid OTP.");
     }
   };
 
@@ -73,7 +74,7 @@ function AttendanceDriver() {
 
   return (
     <div className="card attendance-card">
-      <h3>🧑‍✈️ Driver Attendance Panel</h3>
+      <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}><DriverIcon size={22} />Driver Attendance Panel</h3>
 
       {!active && (
         <button onClick={generateOTP} style={{ width: "100%", maxWidth: 360, margin: "0 auto" }}>
@@ -87,14 +88,14 @@ function AttendanceDriver() {
             OTP: {otp}
           </p>
           <p style={{ textAlign: "center", color: "#d9534f", margin: 0 }}>
-            ⏳ Time Left: {timeLeft} sec
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><ClockIcon size={16} color="#d9534f" />Time Left: {timeLeft} sec</span>
           </p>
 
           <div className="attendance-qr" style={{ textAlign: "center", padding: 12, borderRadius: 6 }}>
             <div style={{ background: "#f9f9f9", padding: 12, borderRadius: 6 }}>
               <QRCode value={otp} size={180} />
             </div>
-            <div style={{ marginTop: 8 }}>📷 Scan QR Code</div>
+            <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 6 }}><CameraIcon size={16} />Scan QR Code</div>
             <div style={{ width: "100%", maxWidth: 320 }}>
               <QrReader
                 delay={300}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { AnnouncementIcon } from "./Icons";
 
 export default function AnnouncementFeed() {
     const [announcements, setAnnouncements] = useState([]);
@@ -34,7 +35,7 @@ export default function AnnouncementFeed() {
 
     return (
         <div className="card" style={{ minHeight: "450px", padding: "1.5rem", textAlign: "left" }}>
-            <h3 style={{ color: "#2b3674", marginBottom: "1.5rem" }}>📢 Global Announcements</h3>
+            <h3 style={{ color: "#8a5a00", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "10px" }}><AnnouncementIcon size={22} color="#8a5a00" />Global Announcements</h3>
             
             <div style={{ marginBottom: "2rem", display: "flex", gap: "10px" }}>
                 <input 
@@ -51,7 +52,7 @@ export default function AnnouncementFeed() {
                     onClick={handleSend}
                     style={{ 
                         padding: "10px 25px", borderRadius: "12px", border: "none",
-                        background: "linear-gradient(135deg, #4318FF 0%, #3B71FE 100%)",
+                        background: "linear-gradient(135deg, #d89a10 0%, #f4bf32 100%)",
                         color: "white", fontWeight: "bold", cursor: "pointer"
                     }}
                 >
@@ -66,14 +67,15 @@ export default function AnnouncementFeed() {
                         background: "#f4f7fe", border: "1px solid #edf2f7"
                     }}>
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
-                            <span style={{ fontWeight: "700", color: "#2b3674" }}>{a.title}</span>
+                            <span style={{ fontWeight: "700", color: "#8a5a00" }}>{a.title}</span>
                             <span style={{ fontSize: "0.75rem", color: "#a3aed0" }}>{a.date}</span>
                         </div>
                         <p style={{ margin: 0, color: "#707eae", fontSize: "0.9rem" }}>{a.content}</p>
-                        <div style={{ marginTop: "8px", fontSize: "0.7rem", color: "#4318FF", fontWeight: "600" }}>By {a.author}</div>
+                        <div style={{ marginTop: "8px", fontSize: "0.7rem", color: "#d89a10", fontWeight: "600" }}>By {a.author}</div>
                     </div>
                 ))}
             </div>
         </div>
     );
 }
+

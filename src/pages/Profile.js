@@ -1,11 +1,9 @@
 
 import React, { useRef, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Navigation from "../components/Navigation";
 import { updateUserProfile, getUserProfile, getBuses } from "../services/api";
 
 export default function Profile() {
-  const navigate = useNavigate();
   const [user, setUser] = useState({
     name: "User",
     email: "user@example.com",
@@ -25,6 +23,7 @@ export default function Profile() {
   const [assignedBus, setAssignedBus] = useState(null);
   const [busLoading, setBusLoading] = useState(false);
   const licenseInputRef = useRef(null);
+  const [isAvatarViewerOpen, setIsAvatarViewerOpen] = useState(false);
   const [isLicenseViewerOpen, setIsLicenseViewerOpen] = useState(false);
   const departmentOptions = [
     "Computer Science Engineering (CSE)",
@@ -48,7 +47,9 @@ export default function Profile() {
           ? "/harita.jpeg"
           : "/mam.png"
         : user?.role?.toLowerCase() === "driver"
-          ? "/sabbudriver.jpeg"
+          ? String(user?.email || "").toLowerCase() === "siva@driverbitsathy.ac.in"
+            ? "/sabbudriver.jpeg?v=2"
+            : "/tamil.jpeg"
         : "/kisore.png";
 
   const isDriver = user?.role?.toLowerCase() === "driver";
@@ -132,11 +133,14 @@ export default function Profile() {
 
   useEffect(() => {
     const onKeyDown = (e) => {
-      if (e.key === "Escape") setIsLicenseViewerOpen(false);
+      if (e.key === "Escape") {
+        setIsLicenseViewerOpen(false);
+        setIsAvatarViewerOpen(false);
+      }
     };
-    if (isLicenseViewerOpen) window.addEventListener("keydown", onKeyDown);
+    if (isLicenseViewerOpen || isAvatarViewerOpen) window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isLicenseViewerOpen]);
+  }, [isLicenseViewerOpen, isAvatarViewerOpen]);
 
   const handleSave = async () => {
     try {
@@ -185,9 +189,14 @@ export default function Profile() {
           <div className="profile-header">
             <div className="profile-cover"></div>
             <div className="profile-avatar-section">
-              <div className="avatar-circle">
+              <button
+                type="button"
+                className="avatar-circle avatar-circle-btn"
+                onClick={() => setIsAvatarViewerOpen(true)}
+                aria-label="Open full profile image"
+              >
                 <img className="avatar-image" src={avatarSrc} alt={`${user.name} profile`} />
-              </div>
+              </button>
               <div className="profile-title">
                 <h1>{user.name}</h1>
                 <span className="role-badge">{user.role.toUpperCase()}</span>
@@ -451,6 +460,28 @@ export default function Profile() {
           </div>
         </div>
 
+        {isAvatarViewerOpen && (
+          <div
+            className="license-viewer-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Profile image viewer"
+            onClick={() => setIsAvatarViewerOpen(false)}
+          >
+            <div className="license-viewer-content" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                className="license-viewer-close"
+                onClick={() => setIsAvatarViewerOpen(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <img src={avatarSrc} alt={`${user.name} full profile`} />
+            </div>
+          </div>
+        )}
+
         <style>{`
           .profile-page-wrapper {
             padding-top: 80px;
@@ -497,6 +528,11 @@ export default function Profile() {
             font-weight: bold;
             color: var(--primary-color);
             overflow: hidden;
+          }
+          .avatar-circle-btn {
+            padding: 0;
+            cursor: pointer;
+            border: none;
           }
           .avatar-image {
             width: 100%;
@@ -656,7 +692,7 @@ export default function Profile() {
           .license-card-empty {
             padding: 16px;
             font-weight: 700;
-            color: #2b3674;
+            color: #8a5a00;
           }
 
           .license-card-actions input[type="file"] {
@@ -857,3 +893,4 @@ export default function Profile() {
     </>
   );
 }
+

@@ -1,4 +1,841 @@
 /* Login.css */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation: loginBackgroundReveal 1s ease-out both;
+}
+
+.login-backdrop {
+  width: 100%;
+  max-width: 1200px;
+  min-height: calc(100vh - 48px);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.login-hero {
+  position: relative;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(460px, 42vw);
+  padding: 120px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #ffffff;
+  overflow: hidden;
+  isolation: isolate;
+  animation: loginHeroSlideIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.login-hero::before {
+  content: "";
+  position: absolute;
+  inset: 54px -26px 42px -26px;
+  border-radius: 42px;
+  background:
+    radial-gradient(circle at 20% 28%, rgba(255, 214, 122, 0.22), transparent 24%),
+    linear-gradient(135deg, rgba(255, 214, 122, 0.16), rgba(255, 255, 255, 0.03) 42%, rgba(255, 214, 122, 0.12));
+  border: 1px solid rgba(255, 227, 162, 0.12);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  animation: loginHeroPanelIn 0.95s ease-out 0.16s both;
+}
+
+.login-hero::after {
+  content: "";
+  position: absolute;
+  top: 82px;
+  right: 18px;
+  width: 150px;
+  height: 150px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 214, 122, 0.3) 0%, rgba(255, 214, 122, 0.06) 44%, transparent 72%);
+  filter: blur(2px);
+  opacity: 0;
+  animation: loginHeroGlowPulse 4.6s ease-in-out 0.9s infinite,
+    loginHeroGlowIn 1s ease-out 0.32s both;
+}
+
+.login-hero.login-hero--zoom::before {
+  inset: 54px -26px 42px -26px;
+  border-radius: 42px;
+  background:
+    radial-gradient(circle at 20% 28%, rgba(255, 214, 122, 0.22), transparent 24%),
+    linear-gradient(135deg, rgba(255, 214, 122, 0.16), rgba(255, 255, 255, 0.03) 42%, rgba(255, 214, 122, 0.12));
+  border: 1px solid rgba(255, 227, 162, 0.12);
+  backdrop-filter: blur(2px);
+  animation: loginHeroPanelIn 0.95s ease-out 0.16s both;
+}
+
+.login-hero.login-hero--zoom::after {
+  top: 82px;
+  right: 18px;
+  width: 150px;
+  height: 150px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 214, 122, 0.3) 0%, rgba(255, 214, 122, 0.06) 44%, transparent 72%);
+  filter: blur(2px);
+  animation: loginHeroGlowPulse 4.6s ease-in-out 0.9s infinite,
+    loginHeroGlowIn 1s ease-out 0.32s both;
+}
+
+.login-hero.login-hero--route::before {
+  left: 20px;
+  top: 108px;
+  bottom: 12px;
+  width: 2px;
+  inset: auto;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 227, 162, 0) 0%,
+    rgba(255, 227, 162, 0.96) 18%,
+    rgba(255, 227, 162, 0.5) 74%,
+    rgba(255, 227, 162, 0) 100%
+  );
+  border: none;
+  backdrop-filter: none;
+  transform-origin: top center;
+  animation: loginRouteLineGrow 1.1s ease-out 0.2s both;
+}
+
+.login-hero.login-hero--route::after {
+  left: 15px;
+  top: 108px;
+  right: auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #ffd780;
+  box-shadow: 0 0 0 6px rgba(255, 215, 128, 0.18);
+  filter: none;
+  animation: loginRouteStopDrop 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both,
+    loginRouteStopPulse 2.8s ease-in-out 1.4s infinite;
+}
+
+.login-hero.login-hero--beacon::before {
+  inset: 70px -8px 78px 24px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 212, 121, 0), rgba(255, 212, 121, 0.34), rgba(255, 212, 121, 0));
+  border: none;
+  backdrop-filter: none;
+  transform: rotate(-11deg) scaleX(0.12);
+  transform-origin: left center;
+  filter: blur(1px);
+  animation: loginBeaconSweep 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both;
+}
+
+.login-hero.login-hero--beacon::after {
+  top: 54px;
+  left: 42px;
+  right: auto;
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 214, 122, 0.9) 0%, rgba(255, 214, 122, 0.18) 38%, rgba(255, 214, 122, 0) 72%);
+  filter: blur(1px);
+  animation: loginBeaconCoreIn 0.8s ease-out 0.18s both,
+    loginBeaconPulse 2.6s ease-in-out 1s infinite;
+}
+
+.login-hero.login-hero--shimmer::before {
+  inset: 58px -18px 34px -18px;
+  border-radius: 44px;
+  background:
+    linear-gradient(130deg, rgba(255, 255, 255, 0.06), rgba(255, 214, 122, 0.16)),
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.14), transparent 36%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(5px);
+  animation: loginShimmerCardIn 0.9s ease-out 0.16s both;
+}
+
+.login-hero.login-hero--shimmer::after {
+  inset: 52px -90px 30px auto;
+  width: 180px;
+  height: auto;
+  border-radius: 40px;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 247, 220, 0.06) 34%,
+    rgba(255, 247, 220, 0.62) 50%,
+    rgba(255, 247, 220, 0.08) 64%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  filter: blur(0);
+  transform: skewX(-16deg) translateX(-180px);
+  animation: loginShimmerPass 1.6s ease-out 0.6s both;
+}
+
+.login-hero.login-hero--glitch::before {
+  inset: 60px -16px 38px -8px;
+  border-radius: 36px;
+  background:
+    linear-gradient(90deg, rgba(255, 0, 102, 0.08), rgba(255, 214, 122, 0.14), rgba(0, 224, 255, 0.08)),
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04) 0 2px,
+      rgba(255, 255, 255, 0) 2px 8px
+    );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(3px);
+  animation: loginGlitchFrameIn 0.7s steps(2, end) 0.14s both;
+}
+
+.login-hero.login-hero--glitch::after {
+  inset: 76px 12px auto auto;
+  width: 132px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(255, 214, 122, 0.7), rgba(255, 255, 255, 0));
+  filter: blur(8px);
+  animation: loginGlitchBarFlicker 1.2s steps(3, end) 0.5s both;
+}
+
+.login-hero.login-hero--ripple::before {
+  inset: 42px -24px 24px -24px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 28% 36%, rgba(255, 214, 122, 0.14), transparent 18%),
+    radial-gradient(circle at center, rgba(255, 214, 122, 0.12), rgba(255, 214, 122, 0) 58%);
+  border: 1px solid rgba(255, 230, 173, 0.08);
+  backdrop-filter: none;
+  animation: loginRippleExpand 1.2s ease-out 0.12s both;
+}
+
+.login-hero.login-hero--ripple::after {
+  left: 24px;
+  top: 94px;
+  right: auto;
+  width: 96px;
+  height: 96px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 214, 122, 0.9) 0%, rgba(255, 214, 122, 0.18) 26%, rgba(255, 214, 122, 0) 66%);
+  filter: none;
+  animation: loginRipplePulse 3.2s ease-out 0.7s infinite;
+}
+
+.login-badge {
+  position: absolute;
+  top: 28px;
+  left: 28px;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 12px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #c17b0c;
+  font-weight: 800;
+  font-size: 1rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  z-index: 2;
+  animation: loginBadgeFloatIn 0.75s ease-out 0.1s both, loginBadgeBob 3.8s ease-in-out 1s infinite;
+}
+
+.login-hero-title {
+  margin: 0;
+  max-width: 420px;
+  padding-left: 28px;
+  font-size: clamp(3.4rem, 7vw, 5.3rem);
+  line-height: 0.9;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+.login-hero-title span {
+  display: block;
+  transform-origin: left center;
+  animation: loginTitleZoomIn 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.login-hero.login-hero--route .login-hero-title,
+.login-hero.login-hero--route .login-hero-copy,
+.login-hero.login-hero--route .login-hero-list {
+  padding-left: 34px;
+}
+
+.login-hero.login-hero--route .login-hero-title span {
+  animation-name: loginTitleTrackIn;
+}
+
+.login-hero.login-hero--beacon .login-hero-title span {
+  animation-name: loginTitleLiftGlow;
+}
+
+.login-hero.login-hero--beacon .login-hero-copy {
+  animation-name: loginCopyBeamIn;
+}
+
+.login-hero.login-hero--shimmer .login-hero-title span {
+  animation-name: loginTitleBlurIn;
+}
+
+.login-hero.login-hero--shimmer .login-hero-copy {
+  animation-name: loginCopySoftRise;
+}
+
+.login-hero.login-hero--glitch .login-hero-title span {
+  animation-name: loginTitleGlitchIn;
+}
+
+.login-hero.login-hero--glitch .login-hero-copy {
+  animation-name: loginCopyGlitchIn;
+}
+
+.login-hero.login-hero--ripple .login-hero-title span {
+  animation-name: loginTitleRippleIn;
+}
+
+.login-hero.login-hero--ripple .login-hero-copy {
+  animation-name: loginCopySoftRise;
+}
+
+.login-hero-title span:last-child {
+  margin-left: clamp(2.2rem, 7vw, 5.5rem);
+  animation-delay: 0.16s;
+}
+
+.login-hero-title span:first-child {
+  animation-delay: 0.06s;
+}
+
+.login-hero-copy {
+  margin: 22px 0 0;
+  max-width: 520px;
+  padding-left: 28px;
+  font-size: clamp(1rem, 2.2vw, 1.45rem);
+  line-height: 1.55;
+  color: rgba(255, 248, 238, 0.98);
+  text-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+  animation: loginCopyParallaxIn 0.95s ease-out 0.28s both;
+}
+
+.login-hero-list {
+  margin-top: 30px;
+  padding-left: 28px;
+  display: grid;
+  gap: 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffe4a7;
+  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  animation: loginItemFadeUp 0.9s ease-out 0.34s both;
+}
+
+.login-hero-list div::before {
+  content: "•";
+  margin-right: 10px;
+}
+
+.login-hero-list div {
+  opacity: 0;
+  animation: loginListReveal 0.65s ease-out both;
+}
+
+.login-hero-list div:nth-child(1) { animation-delay: 0.42s; }
+.login-hero-list div:nth-child(2) { animation-delay: 0.52s; }
+.login-hero-list div:nth-child(3) { animation-delay: 0.62s; }
+.login-hero-list div:nth-child(4) { animation-delay: 0.72s; }
+
+.login-box {
+  width: 100%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2.5rem;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.26);
+  text-align: left;
+  border-radius: 32px;
+  animation: loginCardFloatIn 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+}
+
+.login-box .title,
+.login-box .subtitle,
+.login-box label,
+.login-box .footer {
+  position: relative;
+  z-index: 1;
+}
+
+.login-box .title {
+  margin: 0 0 8px;
+  color: #1f2a44;
+  font-size: 2.15rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.login-box .subtitle {
+  margin: 0 0 24px;
+  color: #7b8794;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  text-align: center;
+}
+
+.login-box form {
+  text-align: left;
+}
+
+.login-box label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: #324154;
+}
+
+.login-box input,
+.login-box select {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid #d7dfea;
+  background: rgba(247, 249, 252, 0.96);
+  padding: 14px 16px;
+  font-size: 1rem;
+}
+
+.login-box input::placeholder {
+  color: #8ea0b5;
+}
+
+.login-box button[type="submit"] {
+  width: 100%;
+  margin-top: 18px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #cc8b11 0%, #f0b52d 100%);
+  color: #1f1a10;
+  border: none;
+  border-radius: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(204, 139, 17, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.login-box button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgba(204, 139, 17, 0.34);
+  filter: brightness(1.02);
+}
+
+@keyframes loginBackgroundReveal {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes loginHeroSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+@keyframes loginCardFloatIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes loginItemFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes loginHeroPanelIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes loginRouteLineGrow {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes loginRouteStopDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.65);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes loginRouteStopPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 128, 0.22);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 215, 128, 0);
+  }
+}
+
+@keyframes loginHeroGlowIn {
+  from {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes loginHeroGlowPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.42;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.72;
+  }
+}
+
+@keyframes loginBeaconSweep {
+  from {
+    opacity: 0;
+    transform: rotate(-11deg) scaleX(0.12);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-11deg) scaleX(1);
+  }
+}
+
+@keyframes loginBeaconCoreIn {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes loginBeaconPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+}
+
+@keyframes loginShimmerCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes loginShimmerPass {
+  from {
+    opacity: 0;
+    transform: skewX(-16deg) translateX(-180px);
+  }
+  20% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: skewX(-16deg) translateX(120px);
+  }
+}
+
+@keyframes loginGlitchFrameIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  25% {
+    opacity: 0.9;
+    transform: translateX(10px);
+  }
+  50% {
+    transform: translateX(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes loginGlitchBarFlicker {
+  0% {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  30% {
+    opacity: 0.8;
+  }
+  55% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+
+@keyframes loginRippleExpand {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes loginRipplePulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  30% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+@keyframes loginTitleZoomIn {
+  from {
+    opacity: 0;
+    transform: perspective(500px) rotateY(12deg) scale(0.88);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(500px) rotateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes loginTitleTrackIn {
+  from {
+    opacity: 0;
+    transform: translateX(-34px);
+    letter-spacing: 0.08em;
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    letter-spacing: -0.04em;
+  }
+}
+
+@keyframes loginTitleLiftGlow {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.94);
+    text-shadow: 0 0 0 rgba(255, 214, 122, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    text-shadow: 0 10px 24px rgba(0, 0, 0, 0.4), 0 0 18px rgba(255, 214, 122, 0.22);
+  }
+}
+
+@keyframes loginTitleBlurIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes loginTitleGlitchIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+    text-shadow: -8px 0 rgba(0, 224, 255, 0.2), 8px 0 rgba(255, 0, 102, 0.2);
+  }
+  35% {
+    opacity: 1;
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    text-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+  }
+}
+
+@keyframes loginTitleRippleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(18px);
+    letter-spacing: 0.02em;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    letter-spacing: -0.04em;
+  }
+}
+
+@keyframes loginCopyParallaxIn {
+  from {
+    opacity: 0;
+    transform: translate3d(-24px, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes loginCopyBeamIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+    filter: brightness(1.2);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: brightness(1);
+  }
+}
+
+@keyframes loginCopySoftRise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes loginCopyGlitchIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-16px);
+    filter: blur(4px);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateX(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes loginListReveal {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes loginBadgeFloatIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes loginBadgeBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
 .error-message {
   background-color: #fee2e2;
   color: #c53030;
@@ -15,22 +852,22 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
-  background: #eef2ff;
-  padding: 10px 15px;
-  border-radius: 8px;
-  border: 1px solid #c7d2fe;
+  background: #fff5da;
+  padding: 12px 15px;
+  border-radius: 14px;
+  border: 1px solid #f2d48c;
 }
 
 .selected-role-header p {
   margin: 0;
-  color: #3730a3;
+  color: #71510e;
   font-size: 0.95rem;
 }
 
 .change-role-btn {
   background: transparent;
   border: none;
-  color: #4f46e5;
+  color: #a86b00;
   font-size: 0.85rem;
   text-decoration: underline;
   cursor: pointer;
@@ -42,28 +879,74 @@
 }
 
 .change-role-btn:hover {
-  color: #3730a3;
+  color: #7f5200;
   background: transparent;
   transform: none;
 }
 
 .role-select {
   margin-bottom: 15px;
-  padding: 12px;
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  background-color: #f8f9fa;
-  font-size: 1rem;
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
+.role-picker-mobile {
+  display: none;
+}
+
+.role-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.role-picker-option {
+  width: 100%;
+  margin: 0;
+  padding: 16px 14px;
+  border-radius: 18px;
+  border: 1px solid #d7dfea;
+  background: linear-gradient(180deg, rgba(247, 249, 252, 0.96) 0%, rgba(240, 244, 250, 0.96) 100%);
+  color: #1f2a44;
+  text-align: left;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.role-picker-option:hover {
+  transform: translateY(-2px);
+  border-color: rgba(204, 139, 17, 0.45);
+  background: linear-gradient(180deg, #fffdf8 0%, #fff6e2 100%);
+  box-shadow: 0 14px 24px rgba(204, 139, 17, 0.12);
+}
+
+.role-picker-option.active {
+  border-color: #cc8b11;
+  background: linear-gradient(135deg, rgba(204, 139, 17, 0.12) 0%, rgba(240, 181, 45, 0.24) 100%);
+  box-shadow: 0 16px 28px rgba(204, 139, 17, 0.16);
+}
+
+.role-picker-title {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.role-picker-copy {
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: #6d7b8f;
+}
+
 .role-select:focus {
-  border-color: #0d47a1;
+  border-color: #cc8b11;
   background-color: #fff;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.1);
+  box-shadow: 0 0 0 4px rgba(204, 139, 17, 0.12);
 }
 
 /* Transition Container */
@@ -89,4 +972,292 @@
   color: #333;
   margin-bottom: 8px;
   display: block;
+}
+
+.login-box .footer {
+  margin-top: 14px;
+  color: #7b8794;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+@media (max-width: 960px) {
+  .login-hero {
+    position: static;
+    transform: none;
+    width: 100%;
+    max-width: 450px;
+    margin-bottom: 18px;
+    padding: 92px 8px 18px;
+    animation-name: loginMobileHeroIn;
+  }
+
+  .login-box {
+    width: min(100%, 460px);
+    padding: 26px 22px;
+  }
+
+  .login-backdrop {
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    min-height: auto;
+  }
+
+  .login-hero::before {
+    inset: 64px -8px 24px -8px;
+  }
+
+  .login-hero::after {
+    right: 8px;
+    top: 66px;
+    width: 110px;
+    height: 110px;
+  }
+
+  .login-hero.login-hero--route::before {
+    left: 4px;
+    top: 102px;
+    bottom: 18px;
+    width: 2px;
+    inset: auto;
+  }
+
+  .login-hero.login-hero--route::after {
+    left: -1px;
+    top: 102px;
+    width: 12px;
+    height: 12px;
+    inset: auto;
+  }
+}
+
+@keyframes loginMobileHeroIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-container,
+  .login-hero,
+  .login-badge,
+  .login-hero::before,
+  .login-hero::after,
+  .login-hero-title span,
+  .login-hero-copy,
+  .login-hero-list,
+  .login-hero-list div,
+  .login-box {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-container {
+    padding: 10px;
+    align-items: stretch;
+  }
+
+  .login-backdrop {
+    min-height: auto;
+    gap: 10px;
+    justify-content: flex-start;
+  }
+
+  .login-hero {
+    max-width: none;
+    min-height: 340px;
+    padding: 82px 16px 20px;
+    border-radius: 28px;
+  }
+
+  .login-badge {
+    top: 18px;
+    left: 18px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 0.88rem;
+  }
+
+  .login-hero-title {
+    padding-left: 14px;
+    max-width: 260px;
+    font-size: clamp(2.5rem, 12vw, 3.35rem);
+  }
+
+  .login-hero-copy {
+    padding-left: 14px;
+    margin-top: 16px;
+    max-width: 270px;
+    font-size: 0.96rem;
+    line-height: 1.45;
+  }
+
+  .login-hero-list {
+    padding-left: 14px;
+    margin-top: 18px;
+    gap: 8px;
+    font-size: 0.88rem;
+  }
+
+  .login-hero.login-hero--route .login-hero-title,
+  .login-hero.login-hero--route .login-hero-copy,
+  .login-hero.login-hero--route .login-hero-list {
+    padding-left: 18px;
+  }
+
+  .login-hero::before {
+    inset: 56px -4px 18px -4px;
+    border-radius: 30px;
+  }
+
+  .login-hero::after {
+    top: 58px;
+    right: 0;
+    width: 82px;
+    height: 82px;
+  }
+
+  .login-hero.login-hero--route::before {
+    left: 2px;
+    top: 96px;
+    bottom: 22px;
+  }
+
+  .login-hero.login-hero--route::after {
+    left: -3px;
+    top: 96px;
+  }
+
+  .login-box {
+    max-width: none;
+    padding: 22px 16px 18px;
+    border-radius: 28px;
+  }
+
+  .login-box .title {
+    font-size: 1.75rem;
+  }
+
+  .login-box .subtitle {
+    font-size: 0.86rem;
+    letter-spacing: 0.12em;
+    margin-bottom: 18px;
+  }
+
+  .role-picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .role-picker-mobile {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .role-select {
+    display: none;
+  }
+
+  .role-picker-option {
+    min-height: 96px;
+    padding: 13px 12px;
+    border-radius: 16px;
+  }
+
+  .role-picker-title {
+    font-size: 0.98rem;
+  }
+
+  .role-picker-copy {
+    font-size: 0.8rem;
+  }
+
+  .selected-role-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .login-fields.visible {
+    max-height: 520px;
+    margin-top: 12px;
+  }
+
+  .login-box input,
+  .login-box select,
+  .login-box button[type="submit"] {
+    min-height: 52px;
+  }
+
+  .login-box label {
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+
+  .login-box .footer {
+    margin-top: 10px;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .login-container {
+    padding: 8px;
+  }
+
+  .login-hero {
+    min-height: 320px;
+    padding: 78px 14px 18px;
+  }
+
+  .login-hero-title {
+    font-size: 2.3rem;
+    max-width: 230px;
+  }
+
+  .login-hero-copy {
+    max-width: 240px;
+    font-size: 0.9rem;
+  }
+
+  .login-hero-list {
+    font-size: 0.82rem;
+  }
+
+  .login-box {
+    padding: 20px 14px 16px;
+  }
+
+  .role-picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .role-picker-mobile {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .role-picker-option {
+    min-height: 92px;
+    padding: 12px 10px;
+  }
+
+  .role-picker-title {
+    font-size: 0.92rem;
+  }
+
+  .role-picker-copy {
+    font-size: 0.76rem;
+  }
 }

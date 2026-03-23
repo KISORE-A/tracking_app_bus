@@ -20,7 +20,7 @@
 }
 
 .finance-title {
-    color: #2b3674;
+    color: #8a5a00;
     font-size: 1.9rem;
     font-weight: 800;
     letter-spacing: 0.2px;
@@ -63,7 +63,7 @@
 
 .summary-card--neutral {
     background: #ffffff;
-    color: #2b3674;
+    color: #8a5a00;
     border: 1px solid #edf0f7;
     box-shadow: 0 8px 24px rgba(14, 24, 75, 0.08);
 }
@@ -95,7 +95,7 @@
 }
 
 .summary-value.neutral {
-    color: #2b3674;
+    color: #8a5a00;
 }
 
 .summary-sub {
@@ -141,13 +141,20 @@
     border-radius: 18px;
 }
 
+.finance-management-grid {
+    display: grid;
+    grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1.9fr);
+    gap: 20px;
+    align-items: start;
+}
+
 .route-card-header {
     text-align: center;
     margin-bottom: 1rem;
 }
 
 .route-card-title {
-    color: #2b3674;
+    color: #8a5a00;
     font-size: 1.1rem;
     font-weight: 800;
 }
@@ -180,6 +187,10 @@
     .finance-cards {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .finance-management-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 720px) {
@@ -187,3 +198,4 @@
         grid-template-columns: 1fr;
     }
 }
+

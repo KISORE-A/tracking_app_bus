@@ -1,19 +1,16 @@
 const normalizeBaseUrl = (value) => (value ? String(value).replace(/\/+$/, "") : "");
 
-// Prefer CRA dev proxy (package.json "proxy") by default by using a relative URL.
+// Prefer relative `/api` so the React dev server proxy can forward to the backend.
 // For deployments where the API is hosted elsewhere, set `REACT_APP_API_URL`.
 const resolveApiBase = () => {
     const base = normalizeBaseUrl(process.env.REACT_APP_API_URL);
     // Allow `REACT_APP_API_URL` to be set to either `https://host` or `https://host/api`.
     if (base) return base.replace(/\/api$/i, "");
 
-    // In development, default to the local backend port directly. This avoids relying on the CRA proxy
-    // (which requires restarting `npm start` after config changes) and makes the target explicit.
+    // In development, prefer the CRA proxy defined in package.json.
+    // This is more reliable when the frontend is opened from a LAN IP or a non-localhost hostname.
     if (process.env.NODE_ENV === "development") {
-        if (typeof window !== "undefined" && window.location?.hostname) {
-            return `http://${window.location.hostname}:5000`;
-        }
-        return "http://localhost:5000";
+        return "";
     }
 
     // In production, prefer same-origin `/api` (or set `REACT_APP_API_URL`).
@@ -28,6 +25,9 @@ const isFetchNetworkError = (error) => {
 };
 
 const apiUrlForError = () => {
+    if (process.env.NODE_ENV === "development") {
+        return "http://localhost:5000/api";
+    }
     try {
         if (typeof window !== "undefined" && window.location?.origin) {
             return new URL(API_URL, window.location.origin).toString();
@@ -47,8 +47,31 @@ const requestUrlForError = (url) => {
 
 const buildConnectionError = () =>
     new Error(
-        `Cannot connect to server at ${apiUrlForError()}. If you're running locally, start the backend with \`npm run backend\` (port 5000).`
+        `Cannot connect to server at ${apiUrlForError()}. If you're running locally, start the backend with \`npm run backend\` (port 5000) and verify MongoDB is reachable from \`backend/.env\`.`
     );
+
+const parseErrorResponse = async (response) => {
+    const text = await response.text();
+
+    try {
+        return { data: JSON.parse(text), text };
+    } catch {
+        return { data: {}, text };
+    }
+};
+
+const isProxyConnectionFailure = (response, text) => {
+    const contentType = response.headers.get("content-type") || "";
+    const isJson = /application\/json/i.test(contentType);
+    return (
+        response.status === 500 &&
+        !isJson &&
+        (
+            /proxy|ECONNREFUSED|Error occurred while trying to proxy/i.test(text) ||
+            (process.env.NODE_ENV === "development" && !String(text || "").trim())
+        )
+    );
+};
 
 const getHeaders = () => {
     const token = localStorage.getItem("token");
@@ -68,7 +91,8 @@ export const loginUser = async (email, password) => {
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
+            const { data: errorData, text } = await parseErrorResponse(response);
+            if (isProxyConnectionFailure(response, text)) throw buildConnectionError();
             const url = requestUrlForError(endpoint);
             const details =
                 response.status === 404
@@ -84,13 +108,13 @@ export const loginUser = async (email, password) => {
     }
 };
 
-export const registerUser = async (name, email, password, role) => {
+export const registerUser = async (name, email, password, role, extraData = {}) => {
     const endpoint = `${API_URL}/auth/register`;
     try {
         const response = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, password, role }),
+            body: JSON.stringify({ name, email, password, role, ...extraData }),
         });
 
         if (!response.ok) {
@@ -252,7 +276,10 @@ export const addBus = async (busData) => {
             headers: getHeaders(),
             body: JSON.stringify(busData)
         });
-        if (!response.ok) throw new Error("Failed to add bus");
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || "Failed to add bus");
+        }
         return response.json();
     } catch (error) { throw error; }
 };
@@ -298,6 +325,46 @@ export const getFinanceSummary = async () => {
     try {
         const response = await fetch(`${API_URL}/finance/summary`, { headers: getHeaders() });
         if (!response.ok) throw new Error("Failed to fetch finance summary");
+        return response.json();
+    } catch (error) { throw error; }
+};
+
+export const getFeeReminders = async () => {
+    try {
+        const response = await fetch(`${API_URL}/fee-reminders`, { headers: getHeaders() });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || "Failed to fetch fee reminders");
+        }
+        return response.json();
+    } catch (error) { throw error; }
+};
+
+export const createFeeReminder = async (payload) => {
+    try {
+        const response = await fetch(`${API_URL}/fee-reminders`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || "Failed to save fee reminder");
+        }
+        return response.json();
+    } catch (error) { throw error; }
+};
+
+export const deleteFeeReminder = async (id) => {
+    try {
+        const response = await fetch(`${API_URL}/fee-reminders/${id}`, {
+            method: "DELETE",
+            headers: getHeaders()
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || "Failed to delete fee reminder");
+        }
         return response.json();
     } catch (error) { throw error; }
 };
@@ -495,7 +562,10 @@ export const updateBus = async (busId, busData) => {
             headers: getHeaders(),
             body: JSON.stringify(busData)
         });
-        if (!response.ok) throw new Error("Failed to update bus");
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || "Failed to update bus");
+        }
         return response.json();
     } catch (error) { throw error; }
 };
@@ -507,7 +577,10 @@ export const setRouteFees = async (busId, feeAmount) => {
             headers: getHeaders(),
             body: JSON.stringify({ feeAmount })
         });
-        if (!response.ok) throw new Error("Failed to set route fees");
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || "Failed to set route fees");
+        }
         return response.json();
     } catch (error) { throw error; }
 };
@@ -519,7 +592,10 @@ export const updateUser = async (userId, userData) => {
             headers: getHeaders(),
             body: JSON.stringify(userData)
         });
-        if (!response.ok) throw new Error("Failed to update user");
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || "Failed to update user");
+        }
         return response.json();
     } catch (error) { throw error; }
 };

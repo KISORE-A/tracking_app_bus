@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Tooltip } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./MapSection.css"; // We will create this for animations
+import { LocationPinIcon, StudentIcon } from "./Icons";
 
 const createBusIcon = (color, label) =>
   L.divIcon({
@@ -158,6 +159,31 @@ const getPointAlongPath = (path, t) => {
 
 const formatBusId = (id) => String(id).padStart(2, "0");
 
+function MapResizer({ watchKeys = [] }) {
+  const map = useMap();
+  const watchKey = watchKeys.join("|");
+
+  useEffect(() => {
+    const invalidate = () => {
+      window.requestAnimationFrame(() => {
+        map.invalidateSize();
+      });
+    };
+
+    invalidate();
+
+    const timeoutId = window.setTimeout(invalidate, 250);
+    window.addEventListener("resize", invalidate);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener("resize", invalidate);
+    };
+  }, [map, watchKey]);
+
+  return null;
+}
+
 export default function MapSection({ driverLocation = null }) {
   const [activeRoute, setActiveRoute] = useState("all");
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -195,7 +221,7 @@ export default function MapSection({ driverLocation = null }) {
     () =>
       L.divIcon({
         className: "bus-pin",
-        html: `<div class="bus-pin__inner" style="--pin:#4318FF"><span>ME</span></div>`,
+        html: `<div class="bus-pin__inner" style="--pin:#d89a10"><span>ME</span></div>`,
         iconSize: [38, 38],
         iconAnchor: [19, 34],
         popupAnchor: [0, -30],
@@ -256,6 +282,7 @@ export default function MapSection({ driverLocation = null }) {
           tap={false}
           style={{ height: "100%", width: "100%" }}
         >
+          <MapResizer watchKeys={[activeRoute, isPanelOpen]} />
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; OpenStreetMap contributors"
@@ -278,7 +305,7 @@ export default function MapSection({ driverLocation = null }) {
           {/* Destination */}
           <Marker position={BIT} icon={destinationIcon}>
             <Popup className="custom-popup">
-              <strong>🎓 BIT College</strong><br />
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 8, fontWeight: 700 }}><StudentIcon size={16} />BIT College</span><br />
               Destination
             </Popup>
           </Marker>
@@ -290,8 +317,8 @@ export default function MapSection({ driverLocation = null }) {
               icon={driverIcon}
             >
               <Popup className="bus-popup">
-                <div className="popup-header" style={{ background: "#4318FF" }}>
-                  Your Location
+                <div className="popup-header" style={{ background: "#d89a10" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><LocationPinIcon size={16} color="white" />Your Location</span>
                 </div>
                 <div className="popup-body">
                   <p style={{ margin: 0 }}>
@@ -366,7 +393,12 @@ export default function MapSection({ driverLocation = null }) {
                     <div className="route-panel-sub">{activeBus.routeName}</div>
                   </div>
                 </div>
-                <button className="route-panel-close" onClick={() => setIsPanelOpen(false)}>×</button>
+                <button
+                  className="route-panel-close"
+                  onClick={() => setIsPanelOpen(false)}
+                  aria-label="Close route panel"
+                  type="button"
+                />
               </div>
               <div className="route-panel-status">
                 <span className="chip-badge">EN ROUTE</span>
@@ -403,3 +435,4 @@ export default function MapSection({ driverLocation = null }) {
     </div>
   );
 }
+

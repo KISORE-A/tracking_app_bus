@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BusIcon, CheckIcon, CloseIcon, EditIcon } from "./Icons";
 
 const defaultBus = {
   busNo: "TN-23-AB-1234",
@@ -43,10 +44,10 @@ export default function BusInfo() {
       onClick={!isEditing ? () => navigate("/profile") : undefined}
       style={{ cursor: isEditing ? "default" : "pointer" }}
     >
-      <h3>🚌 Bus Information</h3>
+      <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}><BusIcon size={22} />Bus Information</h3>
       {isEditing ? (
         <div className="edit-box">
-          <h4>✏️ Edit Bus</h4>
+          <h4 style={{ display: "flex", alignItems: "center", gap: 8 }}><EditIcon size={18} />Edit Bus</h4>
           <div className="form-group">
             <label>Bus No</label>
             <input
@@ -83,7 +84,7 @@ export default function BusInfo() {
               }}
               className="success"
             >
-              ✓ Save
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><CheckIcon size={16} />Save</span>
             </button>
             <button
               onClick={(e) => {
@@ -92,7 +93,7 @@ export default function BusInfo() {
               }}
               className="secondary"
             >
-              ✕ Cancel
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><CloseIcon size={16} />Cancel</span>
             </button>
           </div>
         </div>
@@ -115,7 +116,7 @@ export default function BusInfo() {
               }}
               style={{ width: "100%", marginTop: "8px" }}
             >
-              ✏️ Edit
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><EditIcon size={16} />Edit</span>
             </button>
           )}
         </div>

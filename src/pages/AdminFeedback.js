@@ -101,7 +101,7 @@ export default function AdminFeedback() {
       <div style={{ background: "#f4f7fe", minHeight: "100vh", padding: "100px 20px 20px 20px" }}>
         <div style={{ maxWidth: "1300px", margin: "0 auto" }}>
           <div className="card" style={{ padding: "1.5rem" }}>
-            <h3 style={{ color: "#2b3674", marginTop: 0 }}>Feedback Management</h3>
+            <h3 style={{ color: "#8a5a00", marginTop: 0 }}>Feedback Management</h3>
             <p style={{ color: "#707eae" }}>
               View all user feedback (good, bad, complaints, suggestions), then reply and update status.
             </p>
@@ -217,3 +217,4 @@ export default function AdminFeedback() {
     </>
   );
 }
+

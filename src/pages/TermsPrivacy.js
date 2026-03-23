@@ -57,67 +57,72 @@ const TermsPrivacy = () => {
                     min-height: 100vh;
                     padding: 32px 20px 48px;
                     background:
-                        radial-gradient(circle at top left, rgba(96, 165, 250, 0.24) 0%, transparent 30%),
-                        radial-gradient(circle at top right, rgba(56, 189, 248, 0.18) 0%, transparent 26%),
-                        linear-gradient(180deg, #eff6ff 0%, #f8fbff 48%, #eef4ff 100%);
+                        radial-gradient(circle at top left, rgba(240, 181, 45, 0.22) 0%, transparent 28%),
+                        radial-gradient(circle at top right, rgba(204, 139, 17, 0.14) 0%, transparent 24%),
+                        radial-gradient(circle at bottom left, rgba(31, 42, 68, 0.08) 0%, transparent 34%),
+                        linear-gradient(180deg, #f8f3ea 0%, #f5efe4 52%, #efe7da 100%);
                 }
                 .terms-container {
                     max-width: 800px;
                     margin: 0 auto;
                     padding: 36px 28px;
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    color: #334155;
+                    color: #324154;
                     line-height: 1.6;
-                    background: rgba(255, 255, 255, 0.82);
+                    background: rgba(255, 255, 255, 0.94);
                     backdrop-filter: blur(10px);
-                    border: 1px solid rgba(147, 197, 253, 0.55);
-                    border-radius: 28px;
-                    box-shadow: 0 24px 60px rgba(59, 130, 246, 0.14);
+                    border: 1px solid rgba(255, 255, 255, 0.45);
+                    border-radius: 32px;
+                    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.26);
                 }
                 .terms-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    border-bottom: 2px solid rgba(147, 197, 253, 0.4);
+                    border-bottom: 1px solid rgba(204, 139, 17, 0.18);
                     padding-bottom: 20px;
                     margin-bottom: 30px;
                 }
                 .terms-header h1 {
                     font-size: 2rem;
-                    color: #1d4ed8;
+                    color: #1f2a44;
                     margin: 0;
+                    font-weight: 900;
                 }
                 .back-button {
-                    background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
-                    color: #ffffff;
-                    border: 1px solid #38bdf8;
-                    padding: 8px 16px;
-                    border-radius: 8px;
+                    background: linear-gradient(135deg, #cc8b11 0%, #f0b52d 100%);
+                    color: #1f1a10;
+                    border: none;
+                    padding: 10px 18px;
+                    border-radius: 14px;
                     cursor: pointer;
-                    font-weight: 600;
-                    box-shadow: 0 10px 24px rgba(14, 165, 233, 0.22);
-                    transition: all 0.2s;
+                    font-weight: 900;
+                    box-shadow: 0 14px 30px rgba(204, 139, 17, 0.28);
+                    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
                 }
                 .back-button:hover {
-                    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-                    color: #ffffff;
+                    transform: translateY(-2px);
+                    box-shadow: 0 18px 34px rgba(204, 139, 17, 0.34);
+                    filter: brightness(1.02);
                 }
                 section {
                     margin-bottom: 40px;
-                    background: linear-gradient(180deg, #ffffff 0%, #f0f7ff 100%);
-                    padding: 20px;
-                    border-radius: 16px;
-                    border: 1px solid rgba(191, 219, 254, 0.9);
-                    box-shadow: 0 10px 24px rgba(59, 130, 246, 0.08);
+                    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 248, 238, 0.94) 100%);
+                    padding: 24px;
+                    border-radius: 22px;
+                    border: 1px solid rgba(204, 139, 17, 0.16);
+                    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
                 }
                 h2 {
-                    color: #2563eb;
-                    border-bottom: 1px solid rgba(191, 219, 254, 0.9);
+                    color: #cc8b11;
+                    border-bottom: 1px solid rgba(204, 139, 17, 0.18);
                     padding-bottom: 10px;
                     margin-top: 0;
+                    font-size: 2rem;
+                    font-weight: 900;
                 }
                 h3 {
-                    color: #0f4c81;
+                    color: #1f4f85;
                     margin-top: 20px;
                     font-size: 1.1rem;
                 }
@@ -127,16 +132,49 @@ const TermsPrivacy = () => {
                 }
                 @media (max-width: 600px) {
                     .terms-page {
-                        padding: 16px 12px 32px;
+                        padding: 14px 10px 28px;
                     }
                     .terms-container {
-                        padding: 24px 16px;
-                        border-radius: 20px;
+                        padding: 20px 14px;
+                        border-radius: 22px;
                     }
                     .terms-header {
                         flex-direction: column;
-                        gap: 15px;
+                        align-items: stretch;
+                        gap: 14px;
                         text-align: center;
+                        padding-bottom: 16px;
+                        margin-bottom: 20px;
+                    }
+                    .terms-header h1 {
+                        font-size: 1.8rem;
+                        line-height: 1.15;
+                    }
+                    .back-button {
+                        width: 100%;
+                        padding: 12px 16px;
+                    }
+                    .terms-content {
+                        display: grid;
+                        gap: 18px;
+                    }
+                    section {
+                        margin-bottom: 0;
+                        padding: 18px 14px;
+                        border-radius: 18px;
+                    }
+                    h2 {
+                        font-size: 1.75rem;
+                        line-height: 1.15;
+                        margin-bottom: 14px;
+                    }
+                    h3 {
+                        font-size: 1rem;
+                        line-height: 1.35;
+                    }
+                    p {
+                        font-size: 0.98rem;
+                        line-height: 1.75;
                     }
                 }
             `}</style>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import QrReader from "react-qr-reader";
 import { verifyAttendanceOtp } from "../services/api";
+import { CameraIcon, StudentIcon } from "./Icons";
 
 function AttendanceStudent() {
   const [enteredOtp, setEnteredOtp] = useState("");
@@ -15,7 +16,7 @@ function AttendanceStudent() {
     setLoading(true);
     try {
       await verifyAttendanceOtp(code);
-      alert("Attendance marked successfully! ✅");
+      alert("Attendance marked successfully.");
     } catch (err) {
       alert("OTP verification failed: " + err.message);
     } finally {
@@ -25,7 +26,7 @@ function AttendanceStudent() {
 
   const submitOTP = () => {
     if (enteredOtp.length !== 6) {
-      alert("Enter valid 6-digit OTP ❌");
+      alert("Enter a valid 6-digit OTP.");
       return;
     }
     handleAttendance(enteredOtp);
@@ -43,10 +44,10 @@ function AttendanceStudent() {
 
   return (
     <div className="card attendance-card">
-      <h3>🎓 Student Attendance</h3>
+      <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}><StudentIcon size={22} />Student Attendance</h3>
 
       <div className="attendance-qr" style={{ marginBottom: 12 }}>
-        <h4 style={{ margin: 0 }}>📷 Scan QR Code</h4>
+        <h4 style={{ margin: 0, display: "flex", alignItems: "center", gap: 8 }}><CameraIcon size={18} />Scan QR Code</h4>
         <div style={{ width: "100%", maxWidth: 360 }}>
           <QrReader
             delay={300}

@@ -1,56 +1,7 @@
-import Navigation from "../components/Navigation";
-import BusInfo from "../components/BusInfo";
-import RouteInfo from "../components/RouteInfo";
-import DriverInfo from "../components/DriverInfo";
+import Navigation from "../components/Navigation"; import BusInfo from "../components/BusInfo"; import RouteInfo from "../components/RouteInfo"; import DriverInfo from "../components/DriverInfo";
 import MapSection from "../components/MapSection";
-import Notifications from "../components/Notifications";
 import AttendanceStudent from "../components/AttendanceStudent";
 import StudentFees from "../components/StudentFees";
 import WeatherInfo from "../components/WeatherInfo";
-import FeedbackPanel from "../components/FeedbackPanel";
-
-export default function StudentDashboard() {
-  return (
-    <>
-      <Navigation />
-      <div className="dashboard-wrapper dashboard-wrapper--wide" id="top">
-        <div className="dashboard">
-          <div id="map-section" className="map-card">
-            <MapSection />
-          </div>
-
-          <div className="dashboard-tri-row" id="profile-section">
-            <BusInfo />
-            <div id="route-section"><RouteInfo /></div>
-            <DriverInfo />
-          </div>
-
-          <div id="notification-section">
-            <Notifications />
-          </div>
-
-          <div style={{ marginTop: "1rem", gridColumn: "1 / -1", width: "100%" }}>
-            <StudentFees />
-          </div>
-
-          <div style={{ marginTop: "1rem", gridColumn: "1 / -1", width: "100%" }}>
-            <AttendanceStudent />
-          </div>
-
-          <div className="card" style={{ padding: "1.5rem", marginTop: "1rem", gridColumn: "1 / -1", width: "100%" }}>
-            <h3 style={{ color: "#2b3674", marginTop: 0 }}>📋 Leave Request</h3>
-            <p style={{ color: "#707eae" }}>Submit your leave to your teacher for approval.</p>
-            <a href="/student/leaves" className="primary" style={{ display: "inline-block", padding: "10px 16px", textDecoration: "none" }}>
-              Open Leave Page
-            </a>
-          </div>
-
-          <div style={{ marginTop: "1rem", gridColumn: "1 / -1", width: "100%" }}>
-            <WeatherInfo allowEdit={false} />
-          </div>
-          <FeedbackPanel />
-        </div>
-      </div>
-    </>
-  );
-}
+import FeedbackPanel from "../components/FeedbackPanel"; export default function StudentDashboard() { return (<><Navigation /><div className="dashboard-wrapper dashboard-wrapper--wide" id="top"><div className="dashboard"><div id="map-section" className="map-card"><MapSection /></div><div className="dashboard-tri-row" id="profile-section"><BusInfo /><div id="route-section"><RouteInfo /></div><DriverInfo /></div><div style={{ marginTop: "1rem", gridColumn: "1 / -1", width: "100%" }}><StudentFees /></div><div style={{ marginTop: "1rem", gridColumn: "1 / -1", width: "100%" }}><AttendanceStudent /></div><div className="card" style={{ padding: "1.5rem", marginTop: "1rem", gridColumn: "1 / -1", width: "100%" }}><h3 style={{ color: "#8a5a00", marginTop: 0 }}>Leave Request</h3><p style={{ color: "#707eae" }}>Submit your leave to your teacher for approval.</p><a href="/student/leaves" className="primary" style={{ display: "inline-block", padding: "10px 16px", textDecoration: "none" }}>Open Leave Page</a></div><div style={{ marginTop: "1rem", gridColumn: "1 / -1", width: "100%" }}><WeatherInfo allowEdit={false} /></div><FeedbackPanel /></div></div></>);
+} 

@@ -18,11 +18,16 @@ const LeaveRequest = require('./models/LeaveRequest');
 const Announcement = require('./models/Announcement');
 const WeatherUpdate = require('./models/WeatherUpdate');
 const Feedback = require('./models/Feedback');
+const FeeReminder = require('./models/FeeReminder');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const SECRET_KEY = process.env.SECRET_KEY || 'akshuu_secret_key_fallback_2026';
 const ANALYTICS_FILE = path.join(__dirname, 'analytics.json');
+const WEATHER_LATITUDE = Number(process.env.WEATHER_LATITUDE || 11.4968);
+const WEATHER_LONGITUDE = Number(process.env.WEATHER_LONGITUDE || 77.2722);
+const WEATHER_LOCATION_NAME = process.env.WEATHER_LOCATION_NAME || 'BIT Sathy Campus';
+const WEATHER_API_URL = `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LATITUDE}&longitude=${WEATHER_LONGITUDE}&current=temperature_2m,weather_code,is_day,precipitation,wind_speed_10m&timezone=auto`;
 
 // Connect to MongoDB
 connectDB();
@@ -71,6 +76,142 @@ const mergeMonthlyAttendance = (computed, stored) => {
     return defaults.map((d) => computedMap.get(d.monthKey) || storedMap.get(d.monthKey) || d);
 };
 
+const toNumberOrDefault = (value, fallback = 0) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const toDateOrUndefined = (value) => {
+    if (!value) return undefined;
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
+
+const buildUserPayload = (body = {}) => {
+    const role = String(body.role || 'student').toLowerCase();
+    const payload = {
+        name: body.name,
+        email: body.email,
+        role,
+        phone: body.phone || '',
+        department: body.department || '',
+        assignedBus: body.assignedBus || '',
+        totalFees: toNumberOrDefault(body.totalFees, 0),
+        paidFees: toNumberOrDefault(body.paidFees, 0),
+        paymentStatus: String(body.paymentStatus || '').trim() || 'Pending'
+    };
+
+    if (role === 'student') {
+        payload.studentId = body.studentId || '';
+        payload.year = body.year || '';
+        payload.parentContact = body.parentContact || '';
+        payload.bloodGroup = body.bloodGroup || '';
+        payload.address = body.address || '';
+    }
+
+    if (role === 'teacher') {
+        payload.employeeId = body.employeeId || '';
+        payload.designation = body.designation || '';
+        payload.cabinNo = body.cabinNo || '';
+    }
+
+    if (role === 'driver') {
+        const normalizedLicense = body.licenseNumber || body.licenseNo || '';
+        payload.licenseNumber = normalizedLicense;
+        payload.licenseNo = normalizedLicense;
+        payload.experience = body.experience || '';
+        payload.bloodGroup = body.bloodGroup || '';
+        payload.joiningDate = toDateOrUndefined(body.joiningDate);
+        payload.emergencyContact = body.emergencyContact || '';
+        payload.address = body.address || '';
+        payload.assignedBusNo = body.assignedBusNo || '';
+    }
+
+    const due = Math.max(0, Number(payload.totalFees || 0) - Number(payload.paidFees || 0));
+    payload.paymentStatus = due <= 0 && Number(payload.totalFees || 0) > 0 ? 'Paid' : 'Pending';
+
+    return payload;
+};
+
+const buildBusPayload = (body = {}) => ({
+    busNo: body.busNo,
+    route: body.route || '',
+    type: body.type || 'Transport',
+    status: body.status || 'Running',
+    driverId: body.driverId || undefined,
+    capacity: toNumberOrDefault(body.capacity, 40),
+    filledSeats: toNumberOrDefault(body.filledSeats, 0),
+    feesPerTerm: toNumberOrDefault(body.feesPerTerm, 0),
+    insuranceNo: body.insuranceNo || '',
+    insuranceExpiry: toDateOrUndefined(body.insuranceExpiry),
+    condition: body.condition || 'Good',
+    maintenanceStatus: body.maintenanceStatus || 'Up to date'
+});
+
+const mapWeatherCodeToCondition = (code) => {
+    if (code === 0) return 'Sunny';
+    if (code === 1 || code === 2) return 'Partly Cloudy';
+    if (code === 3) return 'Cloudy';
+    if (code === 45 || code === 48) return 'Foggy';
+    if ([51, 53, 55, 56, 57, 61, 63, 80, 81].includes(code)) return 'Light Rain';
+    if ([65, 66, 67, 82].includes(code)) return 'Heavy Rain';
+    if ([95, 96, 99].includes(code)) return 'Storm';
+    return 'Cloudy';
+};
+
+const buildWeatherNote = ({ condition, precipitation, windSpeed }) => {
+    const notes = [];
+
+    if (condition === 'Heavy Rain' || condition === 'Storm') {
+        notes.push('Road visibility may be affected.');
+    } else if (condition === 'Light Rain') {
+        notes.push('Minor rain expected on routes.');
+    } else if (condition === 'Foggy') {
+        notes.push('Drive carefully in low visibility conditions.');
+    } else if (condition === 'Sunny') {
+        notes.push('Routes are currently clear.');
+    }
+
+    if (Number(precipitation) > 0) {
+        notes.push(`Precipitation ${Number(precipitation).toFixed(1)} mm.`);
+    }
+
+    if (Number(windSpeed) >= 25) {
+        notes.push(`Wind speed ${Math.round(Number(windSpeed))} km/h.`);
+    }
+
+    return notes.join(' ');
+};
+
+const getRealWeatherSnapshot = async () => {
+    const response = await fetch(WEATHER_API_URL);
+    if (!response.ok) {
+        throw new Error(`Weather API failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    const current = data?.current || {};
+    const weatherCode = Number(current.weather_code);
+    const condition = mapWeatherCodeToCondition(weatherCode);
+
+    return {
+        condition,
+        temperatureC: Number(current.temperature_2m) || 0,
+        precipitationMm: Number(current.precipitation) || 0,
+        windSpeedKmh: Number(current.wind_speed_10m) || 0,
+        isDay: Number(current.is_day) === 1,
+        weatherCode,
+        note: buildWeatherNote({
+            condition,
+            precipitation: current.precipitation,
+            windSpeed: current.wind_speed_10m
+        }),
+        updatedAt: current.time ? new Date(current.time) : new Date(),
+        source: 'Open-Meteo',
+        locationName: WEATHER_LOCATION_NAME
+    };
+};
+
 // Middleware to verify Token
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -84,7 +225,7 @@ const verifyToken = (req, res, next) => {
             return res.status(401).json({ error: "Unauthorized" });
         }
         req.userId = decoded.id;
-        req.userRole = decoded.role;
+        req.userRole = String(decoded.role || "").toLowerCase();
         next();
     });
 };
@@ -96,15 +237,22 @@ app.get('/', (req, res) => {
 
 // ================= AUTHENTICATION =================
 app.post('/api/auth/login', async (req, res) => {
-    const { email, password } = req.body;
+    const rawEmail = String(req.body?.email || '').trim();
+    const password = String(req.body?.password || '');
 
-    if (!email || !password) {
+    if (!rawEmail || !password) {
         return res.status(400).json({ error: "Email and password are required" });
     }
 
     try {
-        const user = await User.findOne({ email });
+        const email = rawEmail.toLowerCase();
+        const user =
+            await User.findOne({ email }) ||
+            await User.findOne({ email: { $regex: `^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } });
         if (!user) return res.status(404).json({ error: "User not found" });
+        if (!user.password || typeof user.password !== 'string') {
+            return res.status(500).json({ error: "This account has an invalid password record. Reset or recreate the account." });
+        }
 
         const match = await bcrypt.compare(password, user.password);
         if (!match) return res.status(401).json({ error: "Invalid password" });
@@ -121,16 +269,23 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 app.post('/api/auth/register', async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, password, role } = req.body;
+    const email = String(req.body?.email || '').trim().toLowerCase();
     try {
+        if (!name || !email || !password) {
+            return res.status(400).json({ error: "Name, email and password are required" });
+        }
         const existing = await User.findOne({ email });
         if (existing) {
             return res.status(409).json({ error: "Email already exists. Please use a different email." });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ name, email, password: hashedPassword, role: role || 'student' });
+        const newUser = new User({
+            ...buildUserPayload({ ...req.body, name, email, role: role || 'student' }),
+            password: hashedPassword
+        });
         await newUser.save();
-        res.json({ id: newUser._id, message: "User created" });
+        res.json({ id: newUser._id, message: "User created", user: { ...newUser.toObject(), password: undefined } });
     } catch (err) {
         if (err && err.code === 11000) {
             return res.status(409).json({ error: "Email already exists. Please use a different email." });
@@ -249,10 +404,30 @@ app.get('/api/attendance', verifyToken, async (req, res) => {
 app.put('/api/users/:id', verifyToken, async (req, res) => {
     if (req.userRole !== 'admin') return res.status(403).json({ error: "Access denied" });
     try {
-        if (req.body.password) {
-            req.body.password = await bcrypt.hash(req.body.password, 10);
+        const updateBody = { ...req.body };
+        if (updateBody.password) {
+            updateBody.password = await bcrypt.hash(updateBody.password, 10);
         }
-        const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (updateBody.licenseNumber && !updateBody.licenseNo) {
+            updateBody.licenseNo = updateBody.licenseNumber;
+        }
+        if (updateBody.licenseNo && !updateBody.licenseNumber) {
+            updateBody.licenseNumber = updateBody.licenseNo;
+        }
+        if (updateBody.totalFees !== undefined || updateBody.paidFees !== undefined) {
+            const totalFees = updateBody.totalFees !== undefined ? toNumberOrDefault(updateBody.totalFees, 0) : undefined;
+            const paidFees = updateBody.paidFees !== undefined ? toNumberOrDefault(updateBody.paidFees, 0) : undefined;
+            if (totalFees !== undefined) updateBody.totalFees = totalFees;
+            if (paidFees !== undefined) updateBody.paidFees = paidFees;
+
+            const existingUser = await User.findById(req.params.id).select('totalFees paidFees');
+            const finalTotalFees = totalFees !== undefined ? totalFees : toNumberOrDefault(existingUser?.totalFees, 0);
+            const finalPaidFees = paidFees !== undefined ? paidFees : toNumberOrDefault(existingUser?.paidFees, 0);
+            updateBody.paymentStatus =
+                finalTotalFees > 0 && finalPaidFees >= finalTotalFees ? 'Paid' : 'Pending';
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(req.params.id, updateBody, { new: true });
         res.json(updatedUser);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -282,10 +457,8 @@ app.get('/api/buses', verifyToken, async (req, res) => {
 
 app.post('/api/buses', verifyToken, async (req, res) => {
     if (req.userRole !== 'admin') return res.status(403).json({ error: "Access denied" });
-
-    const { busNo, type, status, capacity } = req.body;
     try {
-        const newBus = new Bus({ busNo, type, status, capacity });
+        const newBus = new Bus(buildBusPayload(req.body));
         await newBus.save();
         res.json(newBus);
     } catch (err) {
@@ -307,7 +480,13 @@ app.delete('/api/buses/:id', verifyToken, async (req, res) => {
 app.put('/api/buses/:id', verifyToken, async (req, res) => {
     if (req.userRole !== 'admin') return res.status(403).json({ error: "Access denied" });
     try {
-        const updated = await Bus.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const existingBus = await Bus.findById(req.params.id);
+        if (!existingBus) return res.status(404).json({ error: "Bus not found" });
+        const updated = await Bus.findByIdAndUpdate(
+            req.params.id,
+            buildBusPayload({ ...existingBus.toObject(), ...req.body }),
+            { new: true }
+        );
         res.json(updated);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -337,9 +516,14 @@ app.put('/api/students/:id/fees', verifyToken, async (req, res) => {
     if (req.userRole !== 'admin') return res.status(403).json({ error: "Access denied" });
     const { totalFees, paidFees, paymentStatus } = req.body;
     try {
+        const normalizedTotalFees = toNumberOrDefault(totalFees, 0);
+        const normalizedPaidFees = toNumberOrDefault(paidFees, 0);
+        const computedStatus =
+            paymentStatus ||
+            (normalizedTotalFees > 0 && normalizedPaidFees >= normalizedTotalFees ? 'Paid' : 'Pending');
         const updated = await User.findByIdAndUpdate(
             req.params.id,
-            { totalFees, paidFees, paymentStatus },
+            { totalFees: normalizedTotalFees, paidFees: normalizedPaidFees, paymentStatus: computedStatus },
             { new: true }
         );
         res.json(updated);
@@ -378,7 +562,10 @@ app.get('/api/driver/location/:driverId', verifyToken, async (req, res) => {
 // ================= STUDENTS / TEACHERS / DRIVERS =================
 app.get('/api/students', verifyToken, async (req, res) => {
     try {
-        const students = await User.find({ role: 'student' }, 'name email role phone year department studentId');
+        const students = await User.find(
+            { role: 'student' },
+            'name email role phone year department studentId parentContact bloodGroup address assignedBus totalFees paidFees paymentStatus'
+        );
         res.json(students);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -387,7 +574,10 @@ app.get('/api/students', verifyToken, async (req, res) => {
 
 app.get('/api/teachers', verifyToken, async (req, res) => {
     try {
-        const teachers = await User.find({ role: 'teacher' }, 'name email role phone department');
+        const teachers = await User.find(
+            { role: 'teacher' },
+            'name email role phone department employeeId designation cabinNo'
+        );
         res.json(teachers);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -396,7 +586,10 @@ app.get('/api/teachers', verifyToken, async (req, res) => {
 
 app.get('/api/drivers', verifyToken, async (req, res) => {
     try {
-        const drivers = await User.find({ role: 'driver' }, 'name email role phone');
+        const drivers = await User.find(
+            { role: 'driver' },
+            'name email role phone licenseNumber licenseNo experience bloodGroup joiningDate emergencyContact address assignedBusNo'
+        );
         res.json(drivers);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -406,11 +599,50 @@ app.get('/api/drivers', verifyToken, async (req, res) => {
 // ================= FINANCE SUMMARY =================
 app.get('/api/finance/summary', verifyToken, async (req, res) => {
     try {
-        const buses = await Bus.find();
-        const totalRevenue = buses.reduce((acc, b) => acc + (b.filledSeats || 0) * 500, 0);
-        const totalCapacity = buses.reduce((acc, b) => acc + (b.capacity || 0), 0);
-        const filledSeats = buses.reduce((acc, b) => acc + (b.filledSeats || 0), 0);
-        const totalPending = (totalCapacity - filledSeats) * 500;
+        const [buses, students] = await Promise.all([
+            Bus.find(),
+            User.find({ role: 'student' }, 'name email phone parentContact assignedBus totalFees paidFees paymentStatus studentId')
+        ]);
+
+        const normalizedStudents = students.map((s) => {
+            const totalFees = Number(s.totalFees || 0);
+            const paidFees = Number(s.paidFees || 0);
+            const due = Math.max(0, totalFees - paidFees);
+            return {
+                _id: s._id,
+                id: s._id,
+                name: s.name,
+                email: s.email,
+                phone: s.phone || '',
+                parentContact: s.parentContact || '',
+                assignedBus: s.assignedBus || '',
+                totalFees,
+                paidFees,
+                due,
+                studentId: s.studentId || '',
+                paymentStatus: due <= 0 && totalFees > 0 ? 'Paid' : 'Pending'
+            };
+        });
+
+        const totalRevenue = normalizedStudents.reduce((acc, s) => acc + s.paidFees, 0);
+        const totalPending = normalizedStudents.reduce((acc, s) => acc + s.due, 0);
+        const totalCapacity = buses.reduce((acc, b) => acc + Number(b.capacity || 0), 0);
+        const filledSeats = normalizedStudents.filter((s) => s.assignedBus).length;
+
+        const routes = buses.map((bus) => {
+            const studentsOnBus = normalizedStudents.filter((s) => String(s.assignedBus || '') === String(bus.busNo || ''));
+            const collected = studentsOnBus.reduce((acc, s) => acc + s.paidFees, 0);
+            const pending = studentsOnBus.reduce((acc, s) => acc + s.due, 0);
+            return {
+                _id: bus._id,
+                busNo: bus.busNo,
+                route: bus.route || bus.busNo,
+                feesPerTerm: Number(bus.feesPerTerm || 0),
+                studentCount: studentsOnBus.length,
+                collected,
+                pending
+            };
+        });
 
         res.json({
             overall: {
@@ -418,8 +650,65 @@ app.get('/api/finance/summary', verifyToken, async (req, res) => {
                 totalPending,
                 totalCapacity,
                 filledSeats
-            }
+            },
+            routes,
+            allStudents: normalizedStudents,
+            unpaidStudents: normalizedStudents.filter((s) => s.due > 0)
         });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ================= FEE REMINDERS =================
+app.get('/api/fee-reminders', verifyToken, async (req, res) => {
+    if (req.userRole !== 'admin') return res.status(403).json({ error: "Access denied" });
+    try {
+        const reminders = await FeeReminder.find({}).sort({ createdAt: -1 });
+        res.json(reminders);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/fee-reminders', verifyToken, async (req, res) => {
+    if (req.userRole !== 'admin') return res.status(403).json({ error: "Access denied" });
+    const { studentId, studentName, email, phone, parentContact, assignedBus, dueAmount, channel, subject, message } = req.body;
+    if (!studentId || !studentName || !channel || !message) {
+        return res.status(400).json({ error: "studentId, studentName, channel and message are required" });
+    }
+    if (!['whatsapp', 'gmail'].includes(channel)) {
+        return res.status(400).json({ error: "Invalid reminder channel" });
+    }
+    try {
+        const admin = await User.findById(req.userId).select('name');
+        const reminder = new FeeReminder({
+            studentId,
+            studentName,
+            email: email || '',
+            phone: phone || '',
+            parentContact: parentContact || '',
+            assignedBus: assignedBus || '',
+            dueAmount: toNumberOrDefault(dueAmount, 0),
+            channel,
+            subject: subject || '',
+            message,
+            createdBy: req.userId,
+            createdByName: admin?.name || 'Admin'
+        });
+        await reminder.save();
+        res.json(reminder);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/fee-reminders/:id', verifyToken, async (req, res) => {
+    if (req.userRole !== 'admin') return res.status(403).json({ error: "Access denied" });
+    try {
+        const deleted = await FeeReminder.findByIdAndDelete(req.params.id);
+        if (!deleted) return res.status(404).json({ error: "Reminder not found" });
+        res.json({ message: "Reminder deleted" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -689,17 +978,24 @@ app.delete('/api/announcements/:id', verifyToken, async (req, res) => {
 app.get('/api/weather', verifyToken, async (req, res) => {
     try {
         const latest = await WeatherUpdate.findOne({}).sort({ updatedAt: -1 });
-        if (!latest) {
-            return res.json({
-                condition: 'Sunny',
-                note: 'No delay updates yet.',
-                etaMinutes: 0,
-                updatedByName: 'System',
-                updatedByRole: 'system',
-                updatedAt: new Date()
-            });
-        }
-        res.json(latest);
+        const liveWeather = await getRealWeatherSnapshot();
+
+        res.json({
+            condition: liveWeather.condition,
+            note: latest?.note || liveWeather.note || 'No delay updates yet.',
+            etaMinutes: Number(latest?.etaMinutes) || 0,
+            updatedByName: latest?.updatedByName || 'System',
+            updatedByRole: latest?.updatedByRole || 'system',
+            updatedAt: latest?.updatedAt || liveWeather.updatedAt || new Date(),
+            liveUpdatedAt: liveWeather.updatedAt,
+            temperatureC: liveWeather.temperatureC,
+            precipitationMm: liveWeather.precipitationMm,
+            windSpeedKmh: liveWeather.windSpeedKmh,
+            isDay: liveWeather.isDay,
+            weatherCode: liveWeather.weatherCode,
+            source: liveWeather.source,
+            locationName: liveWeather.locationName
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -710,13 +1006,11 @@ app.post('/api/weather', verifyToken, async (req, res) => {
         return res.status(403).json({ error: "Access denied" });
     }
     const { condition, note, etaMinutes, updatedByName } = req.body;
-    if (!condition) {
-        return res.status(400).json({ error: "condition is required" });
-    }
     try {
         const user = await User.findById(req.userId).select('name role');
+        const liveWeather = await getRealWeatherSnapshot().catch(() => null);
         const update = new WeatherUpdate({
-            condition,
+            condition: condition || liveWeather?.condition || 'Sunny',
             note: note || '',
             etaMinutes: Number(etaMinutes) || 0,
             updatedById: req.userId,

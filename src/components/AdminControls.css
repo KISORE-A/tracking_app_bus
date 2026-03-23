@@ -4,7 +4,7 @@
 
 .quick-title {
     margin: 0 0 6px 0;
-    color: #2b3674;
+    color: #8a5a00;
     font-size: 1.2rem;
 }
 
@@ -44,7 +44,7 @@
     top: 0;
     bottom: 0;
     width: 6px;
-    background: #4318FF;
+    background: #d89a10;
 }
 
 .quick-card:hover {
@@ -86,3 +86,4 @@
         grid-template-columns: 1fr;
     }
 }
+

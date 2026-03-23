@@ -55,7 +55,7 @@ export default function FeedbackSection() {
 
   return (
     <div className="card" id="feedback-section" style={{ padding: "1.5rem", width: "100%" }}>
-      <h3 style={{ color: "#2b3674", marginTop: 0 }}>Feedback & Complaints</h3>
+      <h3 style={{ color: "#8a5a00", marginTop: 0 }}>Feedback & Complaints</h3>
       <p style={{ color: "#707eae", marginTop: "-4px" }}>
         Post good/bad feedback, complaints, or suggestions. Admin can review and reply.
       </p>
@@ -101,7 +101,7 @@ export default function FeedbackSection() {
       {error && <p style={{ color: "#e53e3e", marginTop: "10px" }}>{error}</p>}
 
       <div style={{ marginTop: "1.1rem" }}>
-        <h4 style={{ color: "#2b3674", margin: "0 0 8px 0" }}>My Feedback History</h4>
+        <h4 style={{ color: "#8a5a00", margin: "0 0 8px 0" }}>My Feedback History</h4>
         {loading ? (
           <p style={{ color: "#707eae", margin: 0 }}>Loading...</p>
         ) : rows.length === 0 ? (
@@ -138,3 +138,4 @@ export default function FeedbackSection() {
     </div>
   );
 }
+

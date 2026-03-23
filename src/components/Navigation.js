@@ -1,5 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import Notifications from "./Notifications";
+import {
+  BellIcon,
+  CalendarIcon,
+  CloseIcon,
+  FileIcon,
+  HomeIcon,
+  LocationPinIcon,
+  LogoutIcon,
+  MapIcon,
+  MessageIcon,
+  RouteIcon,
+  ThemeIcon,
+  UserIcon
+} from "./Icons";
+
+const iconWrap = { display: "inline-flex", alignItems: "center", gap: "0.6rem" };
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,7 +35,9 @@ export default function Navigation() {
           ? "/harita.jpeg"
           : "/mam.png"
         : role?.toLowerCase() === "driver"
-          ? "/sabbudriver.jpeg"
+          ? String(user?.email || "").toLowerCase() === "siva@driverbitsathy.ac.in"
+            ? "/sabbudriver.jpeg?v=2"
+            : "/tamil.jpeg"
         : "/kisore.png";
 
   useEffect(() => {
@@ -67,8 +86,6 @@ export default function Navigation() {
       element.scrollIntoView({ behavior: "smooth" });
       setIsOpen(false);
     } else if (path !== location.pathname) {
-      // If we are on a different page (e.g. Profile), navigate home first then scroll?
-      // For now, if ID exists but element doesn't (different page), just go to path
       if (id) sessionStorage.setItem("scrollToSectionId", id);
       navigate(path);
       setIsOpen(false);
@@ -89,14 +106,14 @@ export default function Navigation() {
             : { path: `/${currentRole}`, id: "attendance-section" };
 
   const navLinks = [
-    { name: "🏠 Home Dashboard", path: `/${currentRole}`, id: "top" },
-    { name: "👤 My Profile", path: "/profile", id: null },
-    { name: "📍 Live Bus Tracking", path: `/${currentRole}`, id: "map-section" },
-    { name: "🚌 Route & Stops", path: `/${currentRole}`, id: "route-section" },
-    { name: "📅 Attendance Records", ...leaveSummaryNav },
-    { name: "🔔 All Notifications", path: `/${currentRole}`, id: "notification-section" },
-    { name: "🗣️ Feedback", path: currentRole === "admin" ? "/admin/feedback" : `/${currentRole}`, id: currentRole === "admin" ? null : "feedback-panel" },
-    { name: "🆘 Emergency Support", path: `/${currentRole}`, id: "support-section" },
+    { name: "Home Dashboard", icon: <HomeIcon size={18} />, path: `/${currentRole}`, id: "top" },
+    { name: "My Profile", icon: <UserIcon size={18} />, path: "/profile", id: null },
+    { name: "Live Bus Tracking", icon: <LocationPinIcon size={18} />, path: `/${currentRole}`, id: "map-section" },
+    { name: "Route & Stops", icon: <MapIcon size={18} />, path: `/${currentRole}`, id: "route-section" },
+    { name: "Attendance Records", icon: <CalendarIcon size={18} />, ...leaveSummaryNav },
+    { name: "All Notifications", icon: <BellIcon size={18} />, path: `/${currentRole}`, id: "notification-section" },
+    { name: "Feedback", icon: <MessageIcon size={18} />, path: currentRole === "admin" ? "/admin/feedback" : `/${currentRole}`, id: currentRole === "admin" ? null : "feedback-panel" },
+    { name: "Emergency Support", icon: <RouteIcon size={18} />, path: `/${currentRole}`, id: "support-section" },
   ];
   const notificationCount = 8;
 
@@ -126,7 +143,6 @@ export default function Navigation() {
               <span className="bar"></span>
               <span className="bar"></span>
             </button>
-            <h1 className="navbar-title">Akshuu</h1>
           </div>
 
           <div className="navbar-user">
@@ -134,87 +150,74 @@ export default function Navigation() {
               className="navbar-avatar-btn"
               onClick={() => navigate("/profile")}
               aria-label="Open profile"
-              style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "50%",
-                border: "2px solid white",
-                padding: 0,
-                overflow: "hidden",
-                background: "white",
-                cursor: "pointer"
-              }}
             >
               <img
                 src={avatarSrc}
                 alt={`${name} profile`}
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                className="navbar-avatar-image"
               />
             </button>
             <span className="navbar-role">{role}</span>
-            <span className="desktop-only text-white" style={{ marginLeft: '10px' }}>Hello, {name}</span>
-            <button
-              className="navbar-notify-btn"
-              onClick={openNotificationsFromNavbar}
-              aria-label="Open notifications"
-              title="Notifications"
-              style={{ marginLeft: "6px" }}
-            >
-              <span className="navbar-notify-icon">🔔</span>
-              <span className="navbar-notify-badge">{notificationCount}</span>
-            </button>
-            <button
-              className="navbar-notify-btn"
-              onClick={openFeedbackFromNavbar}
-              aria-label="Open feedback"
-              title="Feedback"
-              style={{ marginLeft: "6px" }}
-            >
-              <span className="navbar-notify-icon">💬</span>
-            </button>
-            <button className="navbar-logout desktop-only" onClick={handleLogout} style={{ marginLeft: '15px' }}>
+            <span className="desktop-only text-white navbar-user-greeting">Hello, {name}</span>
+            <div className="navbar-action-cluster">
+              <button
+                className="navbar-notify-btn"
+                onClick={openNotificationsFromNavbar}
+                aria-label="Open notifications"
+                title="Notifications"
+              >
+                <span className="navbar-notify-icon"><BellIcon size={18} /></span>
+                <span className="navbar-notify-badge">{notificationCount}</span>
+              </button>
+              <button
+                className="navbar-notify-btn"
+                onClick={openFeedbackFromNavbar}
+                aria-label="Open feedback"
+                title="Feedback"
+              >
+                <span className="navbar-notify-icon"><MessageIcon size={18} /></span>
+              </button>
+            </div>
+            <button className="navbar-logout desktop-only" onClick={handleLogout}>
               Logout
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Sidebar Overlay */}
       <div
         className={`sidebar-overlay ${isOpen ? "open" : ""}`}
         onClick={() => {
           setIsOpen(false);
         }}
-        style={{ cursor: 'pointer', display: isOpen ? 'block' : 'none' }}
+        style={{ cursor: "pointer", display: isOpen ? "block" : "none" }}
       ></div>
 
-      {/* Sidebar Drawer */}
       <aside className={`sidebar ${isOpen ? "open" : ""}`}>
-        <div className="sidebar-header" style={{ position: 'relative' }}>
-          <h2>Akshuu</h2>
+        <div className="sidebar-header" style={{ position: "relative" }}>
           <p>{name} • {role}</p>
           <button
             onClick={() => {
               setIsOpen(false);
             }}
             style={{
-              position: 'absolute',
-              top: '1.5rem',
-              right: '1.5rem',
-              background: 'rgba(255,255,255,0.2)',
-              border: 'none',
-              color: 'white',
-              fontSize: '1.2rem',
-              cursor: 'pointer',
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              position: "absolute",
+              top: "1.5rem",
+              right: "1.5rem",
+              background: "rgba(255,255,255,0.2)",
+              border: "none",
+              color: "white",
+              fontSize: "1.2rem",
+              cursor: "pointer",
+              width: "32px",
+              height: "32px",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
             }}
           >
-            ✕
+            <CloseIcon size={16} />
           </button>
         </div>
 
@@ -224,10 +227,10 @@ export default function Navigation() {
             <div
               key={idx}
               className={`sidebar-link ${location.pathname === link.path && idx === 0 ? "active" : ""}`}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
               onClick={() => scrollToSection(link.id, link.path)}
             >
-              {link.name}
+              <span style={iconWrap}>{link.icon}{link.name}</span>
             </div>
           ))}
 
@@ -236,7 +239,7 @@ export default function Navigation() {
             <div
               key={idx + 3}
               className="sidebar-link"
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
               onClick={() => {
                 if (link.id === "feedback-panel") {
                   setIsOpen(false);
@@ -246,50 +249,52 @@ export default function Navigation() {
                 scrollToSection(link.id, link.path);
               }}
             >
-              {link.name}
+              <span style={iconWrap}>{link.icon}{link.name}</span>
             </div>
           ))}
 
           <div className="sidebar-section">App Settings</div>
-          <div className="sidebar-link" style={{ justifyContent: 'space-between' }}>
-            <span>🌓 {isDarkMode ? 'Dark Mode' : 'Light Mode'}</span>
+          <div className="sidebar-link" style={{ justifyContent: "space-between" }}>
+            <span style={iconWrap}><ThemeIcon size={18} />{isDarkMode ? "Dark Mode" : "Light Mode"}</span>
             <div
               onClick={toggleTheme}
               style={{
-                width: '40px',
-                height: '20px',
-                background: isDarkMode ? 'var(--primary-color)' : '#cbd5e0',
-                borderRadius: '20px',
-                position: 'relative',
-                cursor: 'pointer',
-                transition: 'all 0.3s'
+                width: "40px",
+                height: "20px",
+                background: isDarkMode ? "var(--primary-color)" : "#cbd5e0",
+                borderRadius: "20px",
+                position: "relative",
+                cursor: "pointer",
+                transition: "all 0.3s"
               }}
             >
               <div style={{
-                width: '16px',
-                height: '16px',
-                background: 'white',
-                borderRadius: '50%',
-                position: 'absolute',
-                top: '2px',
-                left: isDarkMode ? '22px' : '2px',
-                transition: 'all 0.3s'
+                width: "16px",
+                height: "16px",
+                background: "white",
+                borderRadius: "50%",
+                position: "absolute",
+                top: "2px",
+                left: isDarkMode ? "22px" : "2px",
+                transition: "all 0.3s"
               }} />
             </div>
           </div>
 
           <div className="sidebar-section">About</div>
           <Link to="/terms-privacy" className="sidebar-link" onClick={() => setIsOpen(false)}>
-            📜 Terms & Privacy
+            <span style={iconWrap}><FileIcon size={18} />Terms & Privacy</span>
           </Link>
         </div>
 
         <div className="sidebar-footer">
           <button className="sidebar-logout-btn" onClick={handleLogout}>
-            🚪 Logout
+            <span style={iconWrap}><LogoutIcon size={18} />Logout</span>
           </button>
         </div>
       </aside>
+
+      <Notifications />
     </>
   );
 }

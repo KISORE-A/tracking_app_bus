@@ -17,7 +17,13 @@ The frontend dev server is configured with a proxy to `http://localhost:5000`, s
 
 If your API is hosted somewhere else (staging/production), set `REACT_APP_API_URL` to the backend base URL (example: `https://example.com`) before running/building the frontend.
 
-Note: the backend connects to MongoDB on startup (via `backend/.env`). If the MongoDB connection fails, the backend process exits and the frontend will show a connection error.
+Note: the backend connects to MongoDB on startup (via `backend/.env`). By default it tries `MONGO_URI` first. In local development, if that fails and `ALLOW_LOCAL_MONGO_FALLBACK` is not set to `false`, it will try `LOCAL_MONGO_URI` and then the default local MongoDB URI `mongodb://127.0.0.1:27017/akshuutransports`.
+
+For local backend development:
+
+- If you use MongoDB Atlas, make sure your current IP is allowed in Atlas Network Access.
+- If Atlas is unavailable, run a local MongoDB server and optionally set `LOCAL_MONGO_URI` in `backend/.env`.
+- If you want to disable the local fallback behavior, set `ALLOW_LOCAL_MONGO_FALLBACK=false` in `backend/.env`.
 
 ### `npm start`
 
