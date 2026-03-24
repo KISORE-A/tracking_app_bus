@@ -387,7 +387,7 @@ const verifyToken = (req, res, next) => {
 };
 
 // Health Check
-app.get('/', (req, res) => {
+app.get('/api/health', (req, res) => {
     res.json({ status: "Backend is running", time: new Date() });
 });
 

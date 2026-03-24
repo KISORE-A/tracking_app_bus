@@ -37,6 +37,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/student" element={<StudentDashboard />} />
         <Route path="/driver" element={<DriverDashboard />} />
         <Route path="/driver/damages" element={<DriverDamageReportsHub />} />
@@ -69,6 +70,7 @@ function App() {
         <Route path="/admin/leaves/students" element={<AdminLeaveList role="student" />} />
         <Route path="/student/leaves" element={<StudentLeavePage />} />
         <Route path="/admin/feedback" element={<AdminFeedback />} />
+        <Route path="*" element={<Login />} />
       </Routes>
     </BrowserRouter>
   );
