@@ -7,6 +7,7 @@ const PRIMARY_MONGO_URI = process.env.MONGO_URI || LOCAL_MONGO_URI;
 const shouldAllowLocalFallback =
   process.env.ALLOW_LOCAL_MONGO_FALLBACK !== 'false' &&
   PRIMARY_MONGO_URI !== LOCAL_MONGO_URI;
+const RECONNECT_INTERVAL_MS = Number(process.env.MONGO_RECONNECT_INTERVAL_MS || 30000);
 
 const maskMongoUri = (uri) => String(uri || '').replace(/:([^:@/]+)@/, ':****@');
 
@@ -15,6 +16,14 @@ const connectWithUri = async (mongoUri, label) => {
     serverSelectionTimeoutMS: 5000
   });
   console.log(`MongoDB Connected Successfully (${label}: ${maskMongoUri(mongoUri)})`);
+};
+
+const scheduleReconnect = () => {
+  setTimeout(() => {
+    connectDB().catch((err) => {
+      console.error('MongoDB reconnect attempt failed:', err.message);
+    });
+  }, RECONNECT_INTERVAL_MS);
 };
 
 const connectDB = async () => {
@@ -41,6 +50,11 @@ const connectDB = async () => {
     console.error(`Reason: ${primaryError.message}`);
     console.error('If you use MongoDB Atlas, verify your current IP is allowed in Atlas Network Access.');
     console.error('For local development, start MongoDB locally and set LOCAL_MONGO_URI if needed.');
+    if (process.env.NODE_ENV === 'production') {
+      console.warn(`Continuing startup without DB. Will retry in ${RECONNECT_INTERVAL_MS / 1000}s.`);
+      scheduleReconnect();
+      return;
+    }
     process.exit(1);
   }
 };
