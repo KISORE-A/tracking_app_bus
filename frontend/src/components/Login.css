@@ -1061,50 +1061,50 @@
 
 @media (max-width: 640px) {
   .login-container {
-    padding: 10px;
+    padding: 8px;
     align-items: stretch;
   }
 
   .login-backdrop {
     min-height: auto;
-    gap: 10px;
+    gap: 8px;
     justify-content: flex-start;
   }
 
   .login-hero {
     max-width: none;
-    min-height: 340px;
-    padding: 82px 16px 20px;
-    border-radius: 28px;
+    min-height: 290px;
+    padding: 70px 14px 16px;
+    border-radius: 24px;
   }
 
   .login-badge {
-    top: 18px;
-    left: 18px;
-    padding: 10px 14px;
-    border-radius: 14px;
-    font-size: 0.88rem;
+    top: 14px;
+    left: 14px;
+    padding: 9px 13px;
+    border-radius: 12px;
+    font-size: 0.82rem;
   }
 
   .login-hero-title {
-    padding-left: 14px;
-    max-width: 260px;
-    font-size: clamp(2.5rem, 12vw, 3.35rem);
+    padding-left: 12px;
+    max-width: 230px;
+    font-size: clamp(2.2rem, 11vw, 3rem);
   }
 
   .login-hero-copy {
-    padding-left: 14px;
-    margin-top: 16px;
-    max-width: 270px;
-    font-size: 0.96rem;
-    line-height: 1.45;
+    padding-left: 12px;
+    margin-top: 12px;
+    max-width: 250px;
+    font-size: 0.9rem;
+    line-height: 1.36;
   }
 
   .login-hero-list {
-    padding-left: 14px;
-    margin-top: 18px;
-    gap: 8px;
-    font-size: 0.88rem;
+    padding-left: 12px;
+    margin-top: 14px;
+    gap: 6px;
+    font-size: 0.82rem;
   }
 
   .login-hero.login-hero--route .login-hero-title,
@@ -1114,32 +1114,32 @@
   }
 
   .login-hero::before {
-    inset: 56px -4px 18px -4px;
-    border-radius: 30px;
+    inset: 48px -2px 14px -2px;
+    border-radius: 24px;
   }
 
   .login-hero::after {
-    top: 58px;
+    top: 52px;
     right: 0;
-    width: 82px;
-    height: 82px;
+    width: 66px;
+    height: 66px;
   }
 
   .login-hero.login-hero--route::before {
     left: 2px;
-    top: 96px;
-    bottom: 22px;
+    top: 84px;
+    bottom: 18px;
   }
 
   .login-hero.login-hero--route::after {
     left: -3px;
-    top: 96px;
+    top: 84px;
   }
 
   .login-box {
     max-width: none;
-    padding: 22px 16px 18px;
-    border-radius: 28px;
+    padding: 20px 14px 16px;
+    border-radius: 24px;
   }
 
   .login-box .title {
@@ -1168,23 +1168,25 @@
   }
 
   .role-picker-option {
-    min-height: 96px;
-    padding: 13px 12px;
-    border-radius: 16px;
+    min-height: 88px;
+    padding: 12px 10px;
+    border-radius: 14px;
   }
 
   .role-picker-title {
-    font-size: 0.98rem;
+    font-size: 0.92rem;
   }
 
   .role-picker-copy {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 
   .selected-role-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+    flex-wrap: wrap;
     padding: 12px;
   }
 
@@ -1212,30 +1214,30 @@
 
 @media (max-width: 420px) {
   .login-container {
-    padding: 8px;
+    padding: 6px;
   }
 
   .login-hero {
-    min-height: 320px;
-    padding: 78px 14px 18px;
+    min-height: 268px;
+    padding: 66px 12px 14px;
   }
 
   .login-hero-title {
-    font-size: 2.3rem;
-    max-width: 230px;
+    font-size: 2.05rem;
+    max-width: 208px;
   }
 
   .login-hero-copy {
-    max-width: 240px;
-    font-size: 0.9rem;
+    max-width: 220px;
+    font-size: 0.84rem;
   }
 
   .login-hero-list {
-    font-size: 0.82rem;
+    font-size: 0.76rem;
   }
 
   .login-box {
-    padding: 20px 14px 16px;
+    padding: 18px 12px 14px;
   }
 
   .role-picker {
