@@ -3,7 +3,7 @@ services:
     name: akshuu-transports
     env: node
     plan: free
-    buildCommand: npm install && npm --prefix frontend install && npm --prefix backend install && npm --prefix frontend run build
+    buildCommand: npm install && npm --prefix frontend install --legacy-peer-deps && npm --prefix backend install && npm --prefix frontend run build
     startCommand: node backend/server.js
     envVars:
       - key: NODE_ENV
