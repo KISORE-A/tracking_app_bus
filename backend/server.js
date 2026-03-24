@@ -28,6 +28,7 @@ const ANALYTICS_FILE = path.join(__dirname, 'analytics.json');
 const FEE_TEMPLATE_DOCX_PATH = path.join(__dirname, 'templates', 'fees-form-template.docx');
 const FEE_TEMPLATE_SCRIPT_PATH = path.join(__dirname, 'scripts', 'generate-student-fee-doc.ps1');
 const GENERATED_FEE_DOCS_DIR = path.join(__dirname, 'generated-fee-docs');
+const FRONTEND_BUILD_PATH = path.join(__dirname, '..', 'frontend', 'build');
 const WEATHER_LATITUDE = Number(process.env.WEATHER_LATITUDE || 11.4968);
 const WEATHER_LONGITUDE = Number(process.env.WEATHER_LONGITUDE || 77.2722);
 const WEATHER_LOCATION_NAME = process.env.WEATHER_LOCATION_NAME || 'BIT Sathy Campus';
@@ -1599,6 +1600,13 @@ app.put('/api/analytics/monthly', verifyToken, async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+if (process.env.NODE_ENV === 'production' && fs.existsSync(FRONTEND_BUILD_PATH)) {
+    app.use(express.static(FRONTEND_BUILD_PATH));
+    app.get(/^\/(?!api).*/, (req, res) => {
+        res.sendFile(path.join(FRONTEND_BUILD_PATH, 'index.html'));
+    });
+}
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

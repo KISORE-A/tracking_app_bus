@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: akshuu-transports
+    env: node
+    plan: free
+    buildCommand: npm install && npm --prefix frontend install && npm --prefix backend install && npm --prefix frontend run build
+    startCommand: node backend/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: SECRET_KEY
+        sync: false
