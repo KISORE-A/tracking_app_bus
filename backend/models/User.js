@@ -1,5 +1,13 @@
 const mongoose = require('mongoose');
 
+const StudentFeeDocumentSchema = new mongoose.Schema({
+    fileName: { type: String, default: '' },
+    mimeType: { type: String, default: '' },
+    size: { type: Number, default: 0 },
+    data: { type: String, default: '' },
+    uploadedAt: { type: Date, default: Date.now }
+}, { _id: false });
+
 const UserSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
@@ -19,6 +27,14 @@ const UserSchema = new mongoose.Schema({
     totalFees: { type: Number, default: 0 },
     paidFees: { type: Number, default: 0 },
     paymentStatus: { type: String, enum: ['Pending', 'Paid'], default: 'Pending' },
+    feeHistoryTitle: { type: String, default: '' },
+    feeHistoryNote: { type: String, default: '' },
+    feeHistoryUpdatedAt: { type: Date },
+    feeTemplateFields: { type: mongoose.Schema.Types.Mixed, default: () => ({}) },
+    feeDocuments: {
+        pdf: { type: StudentFeeDocumentSchema, default: () => ({}) },
+        docx: { type: StudentFeeDocumentSchema, default: () => ({}) }
+    },
     // Driver-only profile fields
     licenseNumber: { type: String },
     licenseNo: { type: String },

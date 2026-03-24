@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
@@ -24,6 +25,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const SECRET_KEY = process.env.SECRET_KEY || 'akshuu_secret_key_fallback_2026';
 const ANALYTICS_FILE = path.join(__dirname, 'analytics.json');
+const FEE_TEMPLATE_DOCX_PATH = path.join(__dirname, 'templates', 'fees-form-template.docx');
+const FEE_TEMPLATE_SCRIPT_PATH = path.join(__dirname, 'scripts', 'generate-student-fee-doc.ps1');
+const GENERATED_FEE_DOCS_DIR = path.join(__dirname, 'generated-fee-docs');
 const WEATHER_LATITUDE = Number(process.env.WEATHER_LATITUDE || 11.4968);
 const WEATHER_LONGITUDE = Number(process.env.WEATHER_LONGITUDE || 77.2722);
 const WEATHER_LOCATION_NAME = process.env.WEATHER_LOCATION_NAME || 'BIT Sathy Campus';
@@ -34,8 +38,9 @@ connectDB();
 
 app.use(cors());
 // Allow base64 image payloads for damage reports (default 100kb is too small).
-app.use(express.json({ limit: '15mb' }));
-app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+app.use(express.json({ limit: '40mb' }));
+app.use(express.urlencoded({ extended: true, limit: '40mb' }));
+fs.mkdirSync(GENERATED_FEE_DOCS_DIR, { recursive: true });
 
 const loadAnalyticsStore = () => {
     try {
@@ -132,6 +137,156 @@ const buildUserPayload = (body = {}) => {
 
     return payload;
 };
+
+const EMPTY_FEE_DOCUMENT = {
+    fileName: '',
+    mimeType: '',
+    size: 0,
+    data: '',
+    uploadedAt: null
+};
+
+const sanitizeFeeDocument = (doc) => {
+    if (!doc || !doc.data) return null;
+    return {
+        fileName: doc.fileName || '',
+        mimeType: doc.mimeType || 'application/octet-stream',
+        size: Number(doc.size || 0),
+        uploadedAt: doc.uploadedAt || null
+    };
+};
+
+const buildStudentFeeHistoryMeta = (student) => {
+    const pdf = sanitizeFeeDocument(student?.feeDocuments?.pdf);
+    const docx = sanitizeFeeDocument(student?.feeDocuments?.docx);
+    return {
+        title: student?.feeHistoryTitle || '',
+        note: student?.feeHistoryNote || '',
+        updatedAt: student?.feeHistoryUpdatedAt || null,
+        templateFields: student?.feeTemplateFields || {},
+        hasAnyDocument: Boolean(pdf || docx),
+        pdf,
+        docx
+    };
+};
+
+const formatFeeTemplateDate = (value = new Date()) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear()}`;
+};
+
+const coerceText = (value, fallback = '') => {
+    const normalized = value === undefined || value === null ? '' : String(value).trim();
+    return normalized || fallback;
+};
+
+const buildStudentFeeTemplateFields = (student, overrides = {}) => {
+    const totalFees = Number(student?.totalFees || 0);
+    const paidFees = Number(student?.paidFees || 0);
+    const due = Math.max(0, totalFees - paidFees);
+    const base = {
+        academicYear: '2023-2027',
+        studentName: coerceText(student?.name, 'STUDENT NAME'),
+        registerNumber: coerceText(student?.studentId, 'REGISTER NUMBER'),
+        department: coerceText(student?.department, 'DEPARTMENT'),
+        collegeName: 'BANNARI AMMAN INSTITUTE OF TECHNOLOGY, SATHY',
+        parentName: 'PARENT NAME',
+        mobileNumber: coerceText(student?.parentContact || student?.phone, 'PHONE NUMBER'),
+        email: coerceText(student?.email, 'EMAIL ID'),
+        busRouteNumber: coerceText(student?.assignedBus, 'BUS ROUTE'),
+        boardingPoint: 'BOARDING POINT',
+        totalFees: totalFees > 0 ? String(totalFees) : '0',
+        amountPayingNow: paidFees > 0 ? String(paidFees) : '0',
+        paymentMode: 'Cash / UPI / Card / Net Banking',
+        transactionId: 'TRANSACTION ID',
+        paymentDate: formatFeeTemplateDate(),
+        previousDue: due > 0 ? String(due) : 'NIL',
+        remainingBalance: due > 0 ? String(due) : 'NIL',
+        studentSignatureName: coerceText(student?.name, 'STUDENT'),
+        parentSignatureName: 'PARENT',
+        officeUseName: 'OFFICE',
+        receiptNumber: 'RECEIPT NO',
+        receivedBy: 'RECEIVED BY'
+    };
+
+    return {
+        ...base,
+        ...(student?.feeTemplateFields || {}),
+        ...Object.fromEntries(
+            Object.entries(overrides || {}).map(([key, value]) => [key, coerceText(value, base[key] || '')])
+        )
+    };
+};
+
+const runFeeTemplateGenerator = ({ templateFields, outputDocxPath, outputPdfPath }) =>
+    new Promise((resolve, reject) => {
+        const powershell = 'pwsh';
+        const jsonBase64 = Buffer.from(JSON.stringify(templateFields), 'utf8').toString('base64');
+        execFile(
+            powershell,
+            [
+                '-File',
+                FEE_TEMPLATE_SCRIPT_PATH,
+                '-TemplatePath',
+                FEE_TEMPLATE_DOCX_PATH,
+                '-OutputDocx',
+                outputDocxPath,
+                '-OutputPdf',
+                outputPdfPath,
+                '-FieldsJsonBase64',
+                jsonBase64
+            ],
+            { windowsHide: true, timeout: 120000, maxBuffer: 1024 * 1024 * 4 },
+            (error, stdout, stderr) => {
+                if (error) {
+                    return reject(new Error(stderr || stdout || error.message));
+                }
+                resolve({ stdout, stderr });
+            }
+        );
+    });
+
+const fileToDataUrl = (filePath, mimeType) => {
+    const buffer = fs.readFileSync(filePath);
+    return `data:${mimeType};base64,${buffer.toString('base64')}`;
+};
+
+const normalizeFeeDocumentInput = (value, expectedType) => {
+    if (!value) return null;
+    const normalizedType = String(expectedType || '').toLowerCase();
+    const mimeType = String(value.mimeType || '').trim().toLowerCase();
+    const fileName = String(value.fileName || '').trim();
+    const data = String(value.data || '').trim();
+    const size = toNumberOrDefault(value.size, 0);
+
+    if (!fileName || !mimeType || !data) {
+        throw new Error('Uploaded file must include fileName, mimeType and data');
+    }
+    if (!data.startsWith('data:')) {
+        throw new Error('Uploaded file data must be a valid data URL');
+    }
+    if (normalizedType === 'pdf' && mimeType !== 'application/pdf') {
+        throw new Error('PDF upload must use application/pdf');
+    }
+    if (
+        normalizedType === 'docx' &&
+        mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ) {
+        throw new Error('Word upload must be a .docx file');
+    }
+
+    return {
+        fileName,
+        mimeType,
+        size,
+        data,
+        uploadedAt: new Date()
+    };
+};
+
+const canAccessStudentFeeHistory = (req, student) =>
+    req.userRole === 'admin' || String(student?._id || '') === String(req.userId || '');
 
 const buildBusPayload = (body = {}) => ({
     busNo: body.busNo,
@@ -311,7 +466,15 @@ app.get('/api/user/profile', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId).select('-password');
         if (!user) return res.status(404).json({ error: "User not found" });
-        res.json(user);
+        const userObject = user.toObject();
+        if (userObject.role === 'student') {
+            userObject.feeHistory = buildStudentFeeHistoryMeta(user);
+            if (userObject.feeDocuments) {
+                if (userObject.feeDocuments.pdf) delete userObject.feeDocuments.pdf.data;
+                if (userObject.feeDocuments.docx) delete userObject.feeDocuments.docx.data;
+            }
+        }
+        res.json(userObject);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -427,10 +590,59 @@ app.put('/api/users/:id', verifyToken, async (req, res) => {
                 finalTotalFees > 0 && finalPaidFees >= finalTotalFees ? 'Paid' : 'Pending';
         }
 
-        const updatedUser = await User.findByIdAndUpdate(req.params.id, updateBody, { new: true });
-        res.json(updatedUser);
+        if (updateBody.feeHistoryTitle !== undefined) {
+            updateBody.feeHistoryTitle = String(updateBody.feeHistoryTitle || '').trim();
+            updateBody.feeHistoryUpdatedAt = new Date();
+        }
+
+        if (updateBody.feeHistoryNote !== undefined) {
+            updateBody.feeHistoryNote = String(updateBody.feeHistoryNote || '').trim();
+            updateBody.feeHistoryUpdatedAt = new Date();
+        }
+
+        if (updateBody.feeTemplateFields !== undefined) {
+            updateBody.feeTemplateFields = updateBody.feeTemplateFields || {};
+            updateBody.feeHistoryUpdatedAt = new Date();
+        }
+
+        const removePdf = Boolean(updateBody.removePdf);
+        const removeDocx = Boolean(updateBody.removeDocx);
+        const pdfDocument = updateBody.pdfDocument ? normalizeFeeDocumentInput(updateBody.pdfDocument, 'pdf') : null;
+        const docxDocument = updateBody.docxDocument ? normalizeFeeDocumentInput(updateBody.docxDocument, 'docx') : null;
+
+        delete updateBody.pdfDocument;
+        delete updateBody.docxDocument;
+        delete updateBody.removePdf;
+        delete updateBody.removeDocx;
+
+        if (pdfDocument) {
+            updateBody['feeDocuments.pdf'] = pdfDocument;
+            updateBody.feeHistoryUpdatedAt = new Date();
+        } else if (removePdf) {
+            updateBody['feeDocuments.pdf'] = { ...EMPTY_FEE_DOCUMENT, uploadedAt: null };
+            updateBody.feeHistoryUpdatedAt = new Date();
+        }
+
+        if (docxDocument) {
+            updateBody['feeDocuments.docx'] = docxDocument;
+            updateBody.feeHistoryUpdatedAt = new Date();
+        } else if (removeDocx) {
+            updateBody['feeDocuments.docx'] = { ...EMPTY_FEE_DOCUMENT, uploadedAt: null };
+            updateBody.feeHistoryUpdatedAt = new Date();
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(req.params.id, updateBody, { new: true }).select('-password');
+        const response = updatedUser.toObject();
+        if (response.role === 'student') {
+            response.feeHistory = buildStudentFeeHistoryMeta(updatedUser);
+            if (response.feeDocuments) {
+                if (response.feeDocuments.pdf) delete response.feeDocuments.pdf.data;
+                if (response.feeDocuments.docx) delete response.feeDocuments.docx.data;
+            }
+        }
+        res.json(response);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(400).json({ error: err.message });
     }
 });
 
@@ -564,9 +776,153 @@ app.get('/api/students', verifyToken, async (req, res) => {
     try {
         const students = await User.find(
             { role: 'student' },
-            'name email role phone year department studentId parentContact bloodGroup address assignedBus totalFees paidFees paymentStatus'
+            'name email role phone year department studentId parentContact bloodGroup address assignedBus totalFees paidFees paymentStatus feeHistoryTitle feeHistoryNote feeHistoryUpdatedAt feeTemplateFields feeDocuments'
         );
-        res.json(students);
+        const formatted = students.map((student) => {
+            const raw = student.toObject();
+            raw.feeHistory = buildStudentFeeHistoryMeta(student);
+            if (raw.feeDocuments) {
+                if (raw.feeDocuments.pdf) delete raw.feeDocuments.pdf.data;
+                if (raw.feeDocuments.docx) delete raw.feeDocuments.docx.data;
+            }
+            return raw;
+        });
+        res.json(formatted);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/students/:id/fee-history', verifyToken, async (req, res) => {
+    if (req.userRole !== 'admin') return res.status(403).json({ error: "Access denied" });
+
+    try {
+        const student = await User.findOne({ _id: req.params.id, role: 'student' });
+        if (!student) return res.status(404).json({ error: "Student not found" });
+
+        const update = {
+            feeHistoryTitle: String(req.body.title || '').trim(),
+            feeHistoryNote: String(req.body.note || '').trim(),
+            feeTemplateFields: req.body.templateFields || student.feeTemplateFields || {},
+            feeHistoryUpdatedAt: new Date()
+        };
+
+        const removePdf = Boolean(req.body.removePdf);
+        const removeDocx = Boolean(req.body.removeDocx);
+        const pdfDocument = req.body.pdfDocument ? normalizeFeeDocumentInput(req.body.pdfDocument, 'pdf') : null;
+        const docxDocument = req.body.docxDocument ? normalizeFeeDocumentInput(req.body.docxDocument, 'docx') : null;
+
+        if (pdfDocument) {
+            update['feeDocuments.pdf'] = pdfDocument;
+        } else if (removePdf) {
+            update['feeDocuments.pdf'] = { ...EMPTY_FEE_DOCUMENT, uploadedAt: null };
+        }
+
+        if (docxDocument) {
+            update['feeDocuments.docx'] = docxDocument;
+        } else if (removeDocx) {
+            update['feeDocuments.docx'] = { ...EMPTY_FEE_DOCUMENT, uploadedAt: null };
+        }
+
+        const updatedStudent = await User.findByIdAndUpdate(req.params.id, update, { new: true }).select('-password');
+        const response = updatedStudent.toObject();
+        response.feeHistory = buildStudentFeeHistoryMeta(updatedStudent);
+        if (response.feeDocuments) {
+            if (response.feeDocuments.pdf) delete response.feeDocuments.pdf.data;
+            if (response.feeDocuments.docx) delete response.feeDocuments.docx.data;
+        }
+        res.json(response);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+app.post('/api/students/:id/fee-history/generate-template', verifyToken, async (req, res) => {
+    if (req.userRole !== 'admin') return res.status(403).json({ error: "Access denied" });
+
+    try {
+        if (!fs.existsSync(FEE_TEMPLATE_DOCX_PATH)) {
+            return res.status(500).json({ error: "Default fee template file is missing" });
+        }
+
+        const student = await User.findOne({ _id: req.params.id, role: 'student' });
+        if (!student) return res.status(404).json({ error: "Student not found" });
+
+        const templateFields = buildStudentFeeTemplateFields(student, req.body.templateFields || {});
+        const safeName = coerceText(student.name, 'student').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'student';
+        const stamp = Date.now();
+        const outputDocxPath = path.join(GENERATED_FEE_DOCS_DIR, `${safeName}-${stamp}.docx`);
+        const outputPdfPath = path.join(GENERATED_FEE_DOCS_DIR, `${safeName}-${stamp}.pdf`);
+
+        await runFeeTemplateGenerator({
+            templateFields,
+            outputDocxPath,
+            outputPdfPath
+        });
+
+        const update = {
+            feeHistoryTitle: req.body.title ? String(req.body.title).trim() : 'Bus Fees Payment Form',
+            feeHistoryNote: req.body.note ? String(req.body.note).trim() : 'Generated from the default fee template',
+            feeTemplateFields: templateFields,
+            feeHistoryUpdatedAt: new Date(),
+            'feeDocuments.docx': {
+                fileName: path.basename(outputDocxPath),
+                mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                size: fs.statSync(outputDocxPath).size,
+                data: fileToDataUrl(outputDocxPath, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+                uploadedAt: new Date()
+            },
+            'feeDocuments.pdf': {
+                fileName: path.basename(outputPdfPath),
+                mimeType: 'application/pdf',
+                size: fs.statSync(outputPdfPath).size,
+                data: fileToDataUrl(outputPdfPath, 'application/pdf'),
+                uploadedAt: new Date()
+            }
+        };
+
+        const updatedStudent = await User.findByIdAndUpdate(req.params.id, update, { new: true }).select('-password');
+
+        try { fs.unlinkSync(outputDocxPath); } catch { }
+        try { fs.unlinkSync(outputPdfPath); } catch { }
+
+        const response = updatedStudent.toObject();
+        response.feeHistory = buildStudentFeeHistoryMeta(updatedStudent);
+        if (response.feeDocuments) {
+            if (response.feeDocuments.pdf) delete response.feeDocuments.pdf.data;
+            if (response.feeDocuments.docx) delete response.feeDocuments.docx.data;
+        }
+        res.json(response);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+app.get('/api/students/:id/fee-history/:type/download', verifyToken, async (req, res) => {
+    try {
+        const student = await User.findOne({ _id: req.params.id, role: 'student' }).select(
+            'name role feeDocuments'
+        );
+        if (!student) return res.status(404).json({ error: "Student not found" });
+        if (!canAccessStudentFeeHistory(req, student)) {
+            return res.status(403).json({ error: "Access denied" });
+        }
+
+        const type = String(req.params.type || '').toLowerCase();
+        if (!['pdf', 'docx'].includes(type)) {
+            return res.status(400).json({ error: "Invalid file type" });
+        }
+
+        const document = student?.feeDocuments?.[type];
+        if (!document?.data || !document?.mimeType) {
+            return res.status(404).json({ error: "File not found" });
+        }
+
+        const base64Payload = String(document.data).split(',')[1] || '';
+        const fileBuffer = Buffer.from(base64Payload, 'base64');
+        res.setHeader('Content-Type', document.mimeType);
+        res.setHeader('Content-Disposition', `attachment; filename="${document.fileName || `${student.name}-${type}`}"`);
+        res.send(fileBuffer);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1114,13 +1470,13 @@ app.get('/api/analytics', verifyToken, async (req, res) => {
             Bus.find()
         ]);
 
-        const totalRevenue = students.reduce((acc, s) => acc + (s.paidFees || 0), 0);
-        const totalExpected = students.reduce((acc, s) => acc + (s.totalFees || 0), 0);
+        const totalRevenue = students.reduce((acc, s) => acc + toNumberOrDefault(s.paidFees, 0), 0);
+        const totalExpected = students.reduce((acc, s) => acc + toNumberOrDefault(s.totalFees, 0), 0);
         const totalPending = Math.max(0, totalExpected - totalRevenue);
 
         const paymentCounts = students.reduce((acc, s) => {
-            const totalFees = s.totalFees || 0;
-            const paidFees = s.paidFees || 0;
+            const totalFees = toNumberOrDefault(s.totalFees, 0);
+            const paidFees = toNumberOrDefault(s.paidFees, 0);
             if (paidFees >= totalFees && totalFees > 0) acc.paid += 1;
             else if (paidFees > 0 && paidFees < totalFees) acc.partial += 1;
             else acc.unpaid += 1;
