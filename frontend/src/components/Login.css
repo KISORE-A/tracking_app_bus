@@ -1073,38 +1073,23 @@
 
   .login-hero {
     max-width: none;
-    min-height: 290px;
-    padding: 70px 14px 16px;
+    min-height: 90px;
+    padding: 14px 12px;
     border-radius: 24px;
   }
 
   .login-badge {
-    top: 14px;
-    left: 14px;
+    top: 10px;
+    left: 10px;
     padding: 9px 13px;
     border-radius: 12px;
     font-size: 0.82rem;
   }
 
-  .login-hero-title {
-    padding-left: 12px;
-    max-width: 230px;
-    font-size: clamp(2.2rem, 11vw, 3rem);
-  }
-
-  .login-hero-copy {
-    padding-left: 12px;
-    margin-top: 12px;
-    max-width: 250px;
-    font-size: 0.9rem;
-    line-height: 1.36;
-  }
-
+  .login-hero-title,
+  .login-hero-copy,
   .login-hero-list {
-    padding-left: 12px;
-    margin-top: 14px;
-    gap: 6px;
-    font-size: 0.82rem;
+    display: none;
   }
 
   .login-hero.login-hero--route .login-hero-title,
@@ -1114,26 +1099,19 @@
   }
 
   .login-hero::before {
-    inset: 48px -2px 14px -2px;
-    border-radius: 24px;
+    display: none;
   }
 
   .login-hero::after {
-    top: 52px;
-    right: 0;
-    width: 66px;
-    height: 66px;
+    display: none;
   }
 
   .login-hero.login-hero--route::before {
-    left: 2px;
-    top: 84px;
-    bottom: 18px;
+    display: none;
   }
 
   .login-hero.login-hero--route::after {
-    left: -3px;
-    top: 84px;
+    display: none;
   }
 
   .login-box {
@@ -1218,22 +1196,8 @@
   }
 
   .login-hero {
-    min-height: 268px;
-    padding: 66px 12px 14px;
-  }
-
-  .login-hero-title {
-    font-size: 2.05rem;
-    max-width: 208px;
-  }
-
-  .login-hero-copy {
-    max-width: 220px;
-    font-size: 0.84rem;
-  }
-
-  .login-hero-list {
-    font-size: 0.76rem;
+    min-height: 84px;
+    padding: 12px 10px;
   }
 
   .login-box {
