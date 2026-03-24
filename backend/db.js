@@ -2,8 +2,16 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const DEFAULT_MONGO_URI = 'mongodb://127.0.0.1:27017/akshuutransports';
-const LOCAL_MONGO_URI = process.env.LOCAL_MONGO_URI || DEFAULT_MONGO_URI;
-const PRIMARY_MONGO_URI = process.env.MONGO_URI || LOCAL_MONGO_URI;
+const DEFAULT_ATLAS_URI = 'mongodb+srv://render_user:kisorekrish6@cluster0.lyr4o09.mongodb.net/akshuutransports?retryWrites=true&w=majority&appName=Cluster0';
+const normalizeMongoUri = (raw) => {
+  const value = String(raw || '').trim();
+  if (!value) return '';
+  // Handle accidental paste like: MONGO_URI=mongodb+srv://...
+  if (value.startsWith('MONGO_URI=')) return value.slice('MONGO_URI='.length).trim();
+  return value;
+};
+const LOCAL_MONGO_URI = normalizeMongoUri(process.env.LOCAL_MONGO_URI) || DEFAULT_MONGO_URI;
+const PRIMARY_MONGO_URI = normalizeMongoUri(process.env.MONGO_URI) || DEFAULT_ATLAS_URI;
 const shouldAllowLocalFallback =
   process.env.ALLOW_LOCAL_MONGO_FALLBACK !== 'false' &&
   PRIMARY_MONGO_URI !== LOCAL_MONGO_URI;
