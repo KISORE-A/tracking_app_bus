@@ -21,3 +21,19 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+# dependency directories
+node_modules/
+**/node_modules/
+
+# build artifacts
+build/
+**/build/
+
+# caches and logs
+.cache/
+**/.cache/
+backend/runtime-logs/
+
+# environment files
+backend/.env
+frontend/.env
